@@ -1,3 +1,4 @@
+/* Fichier de base */
 // une *proposition*, qui  peut être complétée, élaguée ou adaptée
 
 package ordo;

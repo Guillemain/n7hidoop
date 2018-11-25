@@ -1,3 +1,4 @@
+/* Fichier de base */
 package map;
 
 import java.io.Serializable;

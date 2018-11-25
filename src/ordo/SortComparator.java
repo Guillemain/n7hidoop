@@ -1,3 +1,4 @@
+/* Fichier de base */
 /* une PROPOSITION, incomplète et adaptable... */
 
 package ordo;

@@ -1,3 +1,4 @@
+/* Fichier de base */
 package application;
 
 import java.util.HashMap;

@@ -1,3 +1,4 @@
+/* Fichier de base */
 package ordo;
 
 import java.rmi.Remote;

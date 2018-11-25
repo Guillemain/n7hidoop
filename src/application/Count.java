@@ -1,3 +1,4 @@
+/* Fichier de base */
 package application;
 /* Note : pour pouvoir fonctionner sans modifications, cette application suppose 
  * l'existence d'un attribut statique PATH d'une classe Projet située dans le répertoire 
