@@ -5,6 +5,10 @@ import formats.Format;
 import formats.KV;
 import formats.KVFormat;
 import formats.LineFormat;
+import formats.Commande;
+
+import java.io.*;
+import java.net.*;
 
 public class HdfsClient {
 
@@ -19,7 +23,35 @@ public class HdfsClient {
     public static void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
      int repFactor) { }
 
-    public static void HdfsRead(String hdfsFname, String localFSDestFname) { }
+    public static void HdfsRead(String hdfsFname, String localFSDestFname) {
+        System.out.println("Demande de lecture");
+        File fichier = new File(localFSDestFname);
+        try {
+        	FileOutputStream fos = new FileOutputStream(fichier);
+        	
+            Socket sock = new Socket ("verlaine",4000);
+            ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
+            ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
+       
+            oos.writeObject(Commande.CMD_READ);
+            oos.writeObject(hdfsFname);
+        
+            byte[] buffer = new byte[1024];
+            int readbytes;
+            while((readbytes = ois.read(buffer)) > 0){
+            	fos.write(buffer, 0, readbytes);
+            }
+
+            oos.close();
+            ois.close();
+
+
+        } catch (Exception e) {
+            System.out.println("Erreur HdfsRead (Client)");
+            e.printStackTrace();
+        }
+
+     }
 
 	
     public static void main(String[] args) {
