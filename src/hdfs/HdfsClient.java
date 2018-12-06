@@ -22,15 +22,26 @@ public class HdfsClient {
     	System.out.println("Demande de suppression");
     	
     	try {
-    		Socket sock = new Socket ("verlaine",4000);
-            ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
-            ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
+    		Socket sock1 = new Socket ("verlaine",4000);
+            ObjectOutputStream oos1 = new ObjectOutputStream(sock1.getOutputStream());
+            ObjectInputStream ois1 = new ObjectInputStream(sock1.getInputStream());
             
-            oos.writeObject(Commande.CMD_DELETE);
-            oos.writeObject(hdfsFname);
+            Socket sock2 = new Socket ("rocket",2207);
+            ObjectOutputStream oos2 = new ObjectOutputStream(sock2.getOutputStream());
+            ObjectInputStream ois2 = new ObjectInputStream(sock2.getInputStream());
             
-            oos.close();
-            ois.close();
+            
+            oos1.writeObject(Commande.CMD_DELETE);
+            oos1.writeObject(hdfsFname);
+            
+            oos2.writeObject(Commande.CMD_DELETE);
+            oos2.writeObject(hdfsFname);
+            
+            oos2.close();
+            ois2.close();
+            
+            oos1.close();
+            ois1.close();
             
     	} catch (Exception e) {
     		System.out.println("Erreur HdfdDelate (Client)");
@@ -44,14 +55,18 @@ public class HdfsClient {
     	
     	try {
     		File fichier = new File(localFSSourceFname);
-    		Socket sock = new Socket("verlaine",4000);
-			ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
-        	ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
+    		Socket sock1 = new Socket ("verlaine",4000);
+            ObjectOutputStream oos1 = new ObjectOutputStream(sock1.getOutputStream());
+            ObjectInputStream ois1 = new ObjectInputStream(sock1.getInputStream());
+            
+            Socket sock2 = new Socket ("rocket",2207);
+            ObjectOutputStream oos2 = new ObjectOutputStream(sock2.getOutputStream());
+            ObjectInputStream ois2 = new ObjectInputStream(sock2.getInputStream());
             
             FileReader fr = new FileReader(fichier);
             BufferedReader buff = new BufferedReader(fr);
             
-            /** Pour fragmenter
+            // Compte du nombre de ligne du fichier
             buff.mark(8192);
             int nbLigne = 0;
             while (buff.readLine() != null){
@@ -59,19 +74,35 @@ public class HdfsClient {
             }
             buff.reset();
             
-            String str = new String();
-            for (int j=0; j<nbLigne; j++){
-            	str+= buff.readLine()+"\n";
-            }*/
+            int quotient = nbLigne/2; //2 = Nb de serveurs
+            int reste = nbLigne%2;
             
-            oos.writeObject(Commande.CMD_WRITE);
-            oos.writeObject(fichier.getName());
-            oos.writeObject(fmt);
-            oos.writeObject(localFSSourceFname); //Remplacer par str après
+            //On envoie les donnes
+            String str1 = new String();
+            for (int j=0; j<quotient; j++){
+            	str1+= buff.readLine()+"\n";
+            }
             
-            oos.close();
-            ois.close();
+            oos1.writeObject(Commande.CMD_WRITE);
+            oos1.writeObject(fichier.getName());
+            oos1.writeObject(fmt);
+            oos1.writeObject(str1);
             
+            String str2 = new String();
+            for (int j=0; j<quotient+reste; j++){
+            	str2+= buff.readLine()+"\n";
+            }
+            
+            oos2.writeObject(Commande.CMD_WRITE);
+            oos2.writeObject(fichier.getName());
+            oos2.writeObject(fmt);
+            oos2.writeObject(str2);
+            
+            oos2.close();
+            ois2.close();
+            
+            oos1.close();
+            ois1.close();
     		
     	} catch (Exception e) {
     		System.out.println("Erreur HdfdWrite (Client)");
@@ -86,21 +117,37 @@ public class HdfsClient {
         try {
         	FileOutputStream fos = new FileOutputStream(fichier);
         	
-            Socket sock = new Socket ("verlaine",4000);
-            ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
-            ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
+        	Socket sock1 = new Socket ("verlaine",4000);
+            ObjectOutputStream oos1 = new ObjectOutputStream(sock1.getOutputStream());
+            ObjectInputStream ois1 = new ObjectInputStream(sock1.getInputStream());
+            
+            Socket sock2 = new Socket ("rocket",2207);
+            ObjectOutputStream oos2 = new ObjectOutputStream(sock2.getOutputStream());
+            ObjectInputStream ois2 = new ObjectInputStream(sock2.getInputStream());
        
-            oos.writeObject(Commande.CMD_READ);
-            oos.writeObject(hdfsFname);
+            oos1.writeObject(Commande.CMD_READ);
+            oos1.writeObject(hdfsFname);
         
             byte[] buffer = new byte[1024];
             int readbytes;
-            while((readbytes = ois.read(buffer)) > 0){
+            while((readbytes = ois1.read(buffer)) > 0){
             	fos.write(buffer, 0, readbytes);
             }
+            
+            oos2.writeObject(Commande.CMD_READ);
+            oos2.writeObject(hdfsFname);
+        
+            byte[] buffer2 = new byte[1024];
+            int readbytes2;
+            while((readbytes2 = ois2.read(buffer2)) > 0){
+            	fos.write(buffer2, 0, readbytes2);
+            }
 
-            oos.close();
-            ois.close();
+            oos2.close();
+            ois2.close();
+            
+            oos1.close();
+            ois1.close();
 
 
         } catch (Exception e) {

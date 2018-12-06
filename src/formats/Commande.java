@@ -1,3 +1,3 @@
 package formats;
 
-public enum Commande {CMD_READ, CMD_WRITE, CMD_Delete}
+public enum Commande {CMD_READ, CMD_WRITE, CMD_DELETE}
