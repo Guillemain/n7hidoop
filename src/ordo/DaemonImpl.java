@@ -39,10 +39,16 @@ public class DaemonImpl extends UnicastRemoteObject implements Daemon {
     public void runMap(Mapper m, Format reader, Format writer, Callback cb) {
         System.out.println("<= Requête reçue :"); // tout est dit ?
         m.map(reader, writer);
-        cb.notify();
-
-
-        // Mon travail est enfin achevé ici...
+        System.out.println(" - Traitement fini - ");
+        try {
+            System.out.print(" => On annonce au mainNode que nous avons terminé : ");
+            GestionnaireCB gcb = Naming.lookup(cb.getAdresseRetour());
+            gcb.notifierFinCalcul(cb.getID());
+            System.out.println("annonce passée.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
     }
 
 }
