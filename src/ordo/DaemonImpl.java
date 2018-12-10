@@ -1,8 +1,11 @@
-import java.rmi.Naming;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.concurrent.ExecutionException;
+package ordo;
 
-import javafx.util.Callback;
+import java.rmi.Naming;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+
+
+import formats.Format;
 import map.Mapper;
 
 /**
@@ -15,7 +18,12 @@ import map.Mapper;
  */
 /* A exécuter sur les machines serveur */
 public class DaemonImpl extends UnicastRemoteObject implements Daemon {
-    public static void main(String[] args) {
+    protected DaemonImpl() throws RemoteException {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public static void main(String[] args) {
         try {
             // On crée l'objet serveur
             Daemon srvDaemon = new DaemonImpl();
@@ -36,4 +44,5 @@ public class DaemonImpl extends UnicastRemoteObject implements Daemon {
 
         // Mon travail est enfin achevé ici...
     }
+
 }

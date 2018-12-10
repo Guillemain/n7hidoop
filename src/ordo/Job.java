@@ -3,12 +3,15 @@ package ordo;
 import map.MapReduce;
 import formats.Format;
 import java.rmi.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Guillemain Implémentation de JobInterface;
  */
-public class Job implements JobInterface {
-    private List listeMachine;
+public class Job extends Thread implements JobInterface {
+    private HashMap<String, String> listeMachine;
+    private HashMap<String, Daemon> listeNode;
 
     // Méthodes requises pour la classe Job
     public void setInputFormat(Format.Type ft) {
@@ -20,13 +23,20 @@ public class Job implements JobInterface {
     }
 
     public void startJob(MapReduce mr) {
-
-    }
-
-}
-
-public class Callback {
-    public void hepGfini() {
-
+    	try {
+    		for( Map.Entry<String, String> entry : listeMachine.entrySet() ){
+        		String url = entry.getValue();
+        		Daemon node = new DaemonImpl();
+        		Naming.rebind(url, node);
+        		listeNode.put(entry.getKey(), node);
+        	}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	
+    	
+    	
+    	// Reduce //s
+    		
     }
 }
