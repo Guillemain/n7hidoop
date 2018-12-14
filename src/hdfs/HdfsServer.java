@@ -49,7 +49,7 @@ public class HdfsServer {
 						str += line + "\n";
 					}
 					buff.close();
-					
+					System.out.println(str);
 					oos.writeObject(str);
 					System.out.println("Message envoyé");
 					
@@ -64,6 +64,7 @@ public class HdfsServer {
 					
 					// Reception du texte
 					String strW = (String) ois.readObject();
+					System.out.println(strW);
 					fw.write(strW,0,strW.length()-1);
 					
 					

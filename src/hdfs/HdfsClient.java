@@ -130,7 +130,10 @@ public class HdfsClient {
         
             byte[] buffer = new byte[1024];
             int readbytes;
-            while((readbytes = ois1.read(buffer)) > 0){
+            System.out.println(ois1.read(buffer));
+            while((readbytes = ois1.read(buffer)) >= 0){
+            	System.out.println("in");
+            	System.out.println(readbytes);
             	fos.write(buffer, 0, readbytes);
             }
             
@@ -140,6 +143,8 @@ public class HdfsClient {
             byte[] buffer2 = new byte[1024];
             int readbytes2;
             while((readbytes2 = ois2.read(buffer2)) > 0){
+            	System.out.println("ici");
+            	System.out.println(readbytes2);
             	fos.write(buffer2, 0, readbytes2);
             }
 
@@ -149,7 +154,7 @@ public class HdfsClient {
             oos1.close();
             ois1.close();
 
-
+            System.out.println("FIN");
         } catch (Exception e) {
             System.out.println("Erreur HdfsRead (Client)");
             e.printStackTrace();
@@ -165,7 +170,7 @@ public class HdfsClient {
             if (args.length<2) {usage(); return;}
 
             switch (args[0]) {
-              case "read": HdfsRead(args[1],null); break;
+              case "read": HdfsRead(args[1],"/home/mpelissi/workspace_jee/hidoop/src/hdfs/resultat.txt"); break;
               case "delete": HdfsDelete(args[1]); break;
               case "write": 
                 Format.Type fmt;
