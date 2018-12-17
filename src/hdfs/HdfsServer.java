@@ -39,7 +39,6 @@ public class HdfsServer {
 				case CMD_READ:
 					System.out.println("Demande de lecture reçue par le serveur");
 					String fnameR = (String) ois.readObject();
-					
 					FileReader fr = new FileReader(fnameR);
 					BufferedReader buff = new BufferedReader(fr);
 					// Message à envoyer
@@ -49,7 +48,6 @@ public class HdfsServer {
 						str += line + "\n";
 					}
 					buff.close();
-					System.out.println(str);
 					oos.writeObject(str);
 					System.out.println("Message envoyé");
 					
@@ -79,7 +77,7 @@ public class HdfsServer {
 					String fnameD = (String) ois.readObject();
 					File f = new File(fnameD);
 					f.delete();
-					System.out.println("Fichier " + fnameD + "supprimé");
+					System.out.println("Fichier " + fnameD + " supprimé");
 					break;
 				default:
 					break;

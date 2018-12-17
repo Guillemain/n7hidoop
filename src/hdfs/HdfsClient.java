@@ -32,10 +32,10 @@ public class HdfsClient {
             
             
             oos1.writeObject(Commande.CMD_DELETE);
-            oos1.writeObject(hdfsFname);
+            oos1.writeObject(hdfsFname+"V");
             
             oos2.writeObject(Commande.CMD_DELETE);
-            oos2.writeObject(hdfsFname);
+            oos2.writeObject(hdfsFname+"R");
             
             oos2.close();
             ois2.close();
@@ -84,7 +84,7 @@ public class HdfsClient {
             }
             
             oos1.writeObject(Commande.CMD_WRITE);
-            oos1.writeObject(fichier.getName());
+            oos1.writeObject(fichier.getName()+"V");
             oos1.writeObject(fmt);
             oos1.writeObject(str1);
             
@@ -94,7 +94,7 @@ public class HdfsClient {
             }
             
             oos2.writeObject(Commande.CMD_WRITE);
-            oos2.writeObject(fichier.getName());
+            oos2.writeObject(fichier.getName()+"R");
             oos2.writeObject(fmt);
             oos2.writeObject(str2);
             
@@ -115,7 +115,7 @@ public class HdfsClient {
         System.out.println("Demande de lecture");
         File fichier = new File(localFSDestFname);
         try {
-        	FileOutputStream fos = new FileOutputStream(fichier);
+        	FileWriter fw = new FileWriter(fichier);
         	
         	Socket sock1 = new Socket ("verlaine",4000);
             ObjectOutputStream oos1 = new ObjectOutputStream(sock1.getOutputStream());
@@ -126,35 +126,35 @@ public class HdfsClient {
             ObjectInputStream ois2 = new ObjectInputStream(sock2.getInputStream());
        
             oos1.writeObject(Commande.CMD_READ);
-            oos1.writeObject(hdfsFname);
-        
-            byte[] buffer = new byte[1024];
-            int readbytes;
-            System.out.println(ois1.read(buffer));
-            while((readbytes = ois1.read(buffer)) >= 0){
-            	System.out.println("in");
-            	System.out.println(readbytes);
-            	fos.write(buffer, 0, readbytes);
-            }
+            oos1.writeObject(hdfsFname+"V");
             
             oos2.writeObject(Commande.CMD_READ);
-            oos2.writeObject(hdfsFname);
+            oos2.writeObject(hdfsFname+"R");
         
-            byte[] buffer2 = new byte[1024];
-            int readbytes2;
-            while((readbytes2 = ois2.read(buffer2)) > 0){
-            	System.out.println("ici");
-            	System.out.println(readbytes2);
-            	fos.write(buffer2, 0, readbytes2);
-            }
-
+            try {
+            	String receive = (String) ois1.readObject();
+            	fw.write(receive,0,receive.length());
+            	
+            	String receive2 = (String) ois2.readObject();
+            	fw.write(receive2,0,receive2.length());
+            	
+            } catch (UnknownHostException e) {
+    			System.out.println(" Un des hosts n'est pas reconnu lors de la reception  ");
+    			e.printStackTrace();
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    		} catch (ClassNotFoundException e) {
+    			System.out.println(" Objet non reconnu pendant la reception");
+    			e.printStackTrace();
+    		}
+            fw.close();
             oos2.close();
             ois2.close();
             
             oos1.close();
             ois1.close();
 
-            System.out.println("FIN");
+            System.out.println("Ecriture des données dans le fichier local src/resultat.txt");
         } catch (Exception e) {
             System.out.println("Erreur HdfsRead (Client)");
             e.printStackTrace();
@@ -170,7 +170,7 @@ public class HdfsClient {
             if (args.length<2) {usage(); return;}
 
             switch (args[0]) {
-              case "read": HdfsRead(args[1],"/home/mpelissi/workspace_jee/hidoop/src/hdfs/resultat.txt"); break;
+              case "read": HdfsRead(args[1],"/home/mpelissi/workspace_jee/hidoop/src/resultat.txt"); break;
               case "delete": HdfsDelete(args[1]); break;
               case "write": 
                 Format.Type fmt;

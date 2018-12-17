@@ -33,7 +33,8 @@ public class FormatImpl implements Format{
     // Gestion des threads : 
     boolean oLect = false; boolean oEcriture = false;
 
-    public FormatImpl(String name){
+    public FormatImpl(String name, Type t){
+    	fmt = t;
         nameF = name;
     }
 
@@ -41,7 +42,7 @@ public class FormatImpl implements Format{
         try {
             File fichier = new File(nameF);
             if (mode == OpenMode.R){
-            	System.out.print("Ouverture du fichier " + nameF + " en mode lecture -> ");
+            	System.out.print("Ouverture du fichier " + nameF + " en mode lecture ");
             	oLect = true;
                 //On ouvre le fichie en lecture
                 fichier.setReadable(true);
@@ -53,15 +54,15 @@ public class FormatImpl implements Format{
                 	listeLigne.add(ligne);
                 }
                 buffer.close();
-                System.out.println("Lecture des lignes faites");
+                System.out.println("\nLecture des lignes faites");
             } else {
-            	System.out.println("Ouverture du fichier "+ nameF + "en ecriture.");
+            	System.out.println("Ouverture du fichier "+ nameF + " en ecriture.");
             	oEcriture = true;
             	fichier.setWritable(true);
             	fichierEcriture = new FileWriter(fichier, true);            	
             }
         } catch (Exception e) {
-            System.err.println("Impossible d'ouvrir le fichier.");
+            System.err.println("\nImpossible d'ouvrir le fichier.");
             e.printStackTrace();
         } 
     }
@@ -99,13 +100,14 @@ public class FormatImpl implements Format{
 			return null;
 		}
 		
-		if(index <= listeLigne.size()){
+		if(index >= listeLigne.size()){
+			System.out.println("Il n'y a plus de ligne à lire.");
 			return null;
 		}
-		
 		KV retour = new KV();
 		if (fmt == Type.LINE){
 			retour =  new KV(Integer.toString(index + 1), listeLigne.get(index));
+
 		} else {
 			try {
 				String[] lignes = listeLigne.get(index).split(KV.SEPARATOR);
