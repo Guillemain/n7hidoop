@@ -14,8 +14,8 @@ public class FormatKV implements Format {
 	
 	private static final long serialVersionUID = 1L;
 	private FileReader fichierLecture;
-	private BufferedReader buffer;
-	private FileWriter fichierEcriture;
+	protected BufferedReader buffer;
+	protected FileWriter fichierEcriture;
     private String nameF;
     private ArrayList<String> listeLigne = new ArrayList<>();
 
@@ -24,7 +24,8 @@ public class FormatKV implements Format {
     //  Là /|\ ****************************************************
     
     // Gestion des threads : 
-    boolean oLect = false; boolean oEcriture = false;
+    protected boolean oLect = false;
+    protected boolean oEcriture = false;
 
     public FormatKV(String name){
         nameF = name;
@@ -32,27 +33,27 @@ public class FormatKV implements Format {
 
 	@Override
 	public KV read() {
-		if (!oLect) {
-			System.err.println("Opértation interdite");
+		String line = null;
+		if(oLect){
+			try{
+				line = buffer.readLine();
+				this.index++;
+				
+			}catch (IOException e){
+				e.printStackTrace();
+			}
+		} else {
+			System.err.println("Message erreur de READ");
+		}
+		
+		if(line != null){
+			String[] kv = line.split(KV.SEPARATOR);
+			return new KV(kv[0],kv[1]);
+		} else {
 			return null;
 		}
-
-		if (index <= listeLigne.size()) {
-			return null;
-		}
-
-		KV retour = new KV();
-
-		try {
-			String[] lignes = listeLigne.get(index).split(KV.SEPARATOR);
-			retour = (new KV(lignes[0], lignes[1]));
-		} catch (Exception e) {
-			System.out.println("ERREUR DE LECTURE. Ligne : " + Integer.toString(index));
-		}
-
-		index++;
-		return retour;
 	}
+	
 
 	@Override
 	public void write(KV record) {
@@ -71,7 +72,13 @@ public class FormatKV implements Format {
 
 	public void open(OpenMode mode) {
 		try {
-            File fichier = new File(nameF);
+            File fichier = new File(this.nameF);
+            
+            File parentDirs = fichier.getParentFile();
+            if (parentDirs != null) {
+                parentDirs.mkdirs();
+            }
+            
             if (mode == OpenMode.R){
             	System.out.print("Ouverture du fichier " + nameF + " en mode lecture -> ");
             	oLect = true;
@@ -79,15 +86,9 @@ public class FormatKV implements Format {
                 fichier.setReadable(true);
                 fichierLecture = new FileReader(fichier);
                 buffer = new BufferedReader(fichierLecture);
-                String ligne;
-                // On lit le contenu du fichier.
-                while ((ligne = buffer.readLine())!= null){ // On charge tout la rame /!\  ATTENTION FICHIER LOURD
-                	listeLigne.add(ligne);
-                }
-                buffer.close();
-                System.out.println("Lecture des lignes faites");
+
             } else {
-            	System.out.println("Ouverture du fichier "+ nameF + "en ecriture.");
+            	System.out.println("Ouverture du fichier "+ nameF + " en mode ecriture.");
             	oEcriture = true;
             	fichier.setWritable(true);
             	fichierEcriture = new FileWriter(fichier, true);            	
@@ -106,8 +107,10 @@ public class FormatKV implements Format {
 				oEcriture = false;
 			}
 			if(oLect){
-				fichierLecture.close();
+				//fichierLecture.close();
 				oLect = false;
+				buffer.close();
+				index=0;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -127,7 +130,11 @@ public class FormatKV implements Format {
 
 	@Override
 	public void setFname(String fname) {
-		this.nameF = fname;
+		if(!oLect && !oEcriture){
+			this.nameF = fname;
+		}else {
+			System.err.println("Fermer le fichier avant de modifier son nom.");
+		}
 
 	}
 

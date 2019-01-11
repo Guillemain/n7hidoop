@@ -14,9 +14,9 @@ public class FormatLine implements Format {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private FileReader fichierLecture;
-	private BufferedReader buffer;
-	private FileWriter fichierEcriture;
+	protected FileReader fichierLecture;
+	protected BufferedReader buffer ;
+	protected FileWriter fichierEcriture;
     private String nameF;
     private ArrayList<String> listeLigne = new ArrayList<>();
 
@@ -25,27 +25,35 @@ public class FormatLine implements Format {
     //  Là /|\ ****************************************************
     
     // Gestion des threads : 
-    boolean oLect = false; boolean oEcriture = false;
+    protected boolean oLect = false;
+    protected boolean oEcriture = false;
     
     public FormatLine(String name){
         nameF = name;
+    	this.buffer = null;
     }
 
 	@Override
 	public KV read() {
-		if(!oLect){
-			System.err.println("Opértation interdite");
-			return null;
+		
+		String line = null;
+		if(oLect){
+			try{
+				line = buffer.readLine();
+				this.index++;
+				
+			}catch (IOException e){
+				e.printStackTrace();
+			}
+		} else {
+			System.err.println("Message erreur de READ");
 		}
 		
-		if(index <= listeLigne.size()){
+		if(line != null){
+			return new KV(""+index,line);
+		} else {
 			return null;
 		}
-		
-		KV retour = new KV();
-		retour =  new KV(Integer.toString(index + 1), listeLigne.get(index));
-		index++;
-		return retour;
 	}
 
 	@Override
@@ -64,7 +72,13 @@ public class FormatLine implements Format {
 	@Override
 	public void open(OpenMode mode) {
 		try {
-            File fichier = new File(nameF);
+            File fichier = new File(this.nameF);
+            
+            File parentDirs = fichier.getParentFile();
+            if (parentDirs != null) {
+                parentDirs.mkdirs();
+            }
+            
             if (mode == OpenMode.R){
             	System.out.print("Ouverture du fichier " + nameF + " en mode lecture -> ");
             	oLect = true;
@@ -72,15 +86,9 @@ public class FormatLine implements Format {
                 fichier.setReadable(true);
                 fichierLecture = new FileReader(fichier);
                 buffer = new BufferedReader(fichierLecture);
-                String ligne;
-                // On lit le contenu du fichier.
-                while ((ligne = buffer.readLine())!= null){ // On charge tout la rame /!\  ATTENTION FICHIER LOURD
-                	listeLigne.add(ligne);
-                }
-                buffer.close();
-                System.out.println("Lecture des lignes faites");
+
             } else {
-            	System.out.println("Ouverture du fichier "+ nameF + "en ecriture.");
+            	System.out.println("Ouverture du fichier "+ nameF + " en mode ecriture.");
             	oEcriture = true;
             	fichier.setWritable(true);
             	fichierEcriture = new FileWriter(fichier, true);            	
@@ -99,8 +107,10 @@ public class FormatLine implements Format {
 				oEcriture = false;
 			}
 			if(oLect){
-				fichierLecture.close();
+				//fichierLecture.close();
 				oLect = false;
+				buffer.close();
+				index=0;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -120,7 +130,11 @@ public class FormatLine implements Format {
 
 	@Override
 	public void setFname(String fname) {
-		this.nameF = fname;
+		if(!oLect && !oEcriture){
+			this.nameF = fname;
+		}else {
+			System.err.println("Fermer le fichier avant de modifier son nom.");
+		}
 
 	}
 

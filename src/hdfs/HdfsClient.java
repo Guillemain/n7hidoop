@@ -44,7 +44,7 @@ public class HdfsClient {
             ois1.close();
             
     	} catch (Exception e) {
-    		System.out.println("Erreur HdfdDelete (Client)");
+    		System.out.println("Erreur HdfdDelate (Client)");
     		e.printStackTrace();
     	}
     }
