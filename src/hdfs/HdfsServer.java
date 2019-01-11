@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import formats.Commande;
 import formats.Format;
@@ -16,19 +17,30 @@ import formats.KV;
 //import formats.KVFormat;
 //import formats.LineFormat;
 
-public class HdfsServer {
+public class HdfsServer extends Thread {
 
-	public static void main(String[] args) throws IOException{
-		try {
-			int port = Integer.parseInt(args[0]);
+	private Socket sock;
+	
+	public static void main(String[] args) throws IOException {
 		
-			ServerSocket ss;
-			ss = new ServerSocket(port);
-			System.out.println("Serveur démarré :");
-		
-			while(true){
-				// On ouvre un second socket
-				Socket sock = ss.accept();
+		int port = Integer.parseInt(args[0]);
+
+		ServerSocket ss;
+		ss = new ServerSocket(port);
+		System.out.println("Serveur démarré :");
+
+		while (true) {
+			Thread t = new HdfsServer(ss.accept());
+			t.start();
+		}
+	}
+	
+	public HdfsServer(Socket s){
+		this.sock = s;	
+	}
+	
+	public void run() {
+			try {
 				ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
             	ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
 		
@@ -84,14 +96,17 @@ public class HdfsServer {
 				}
 				ois.close();
 				oos.close();
-				
+				sock.close();
+
 			
-			
-			}
 		} catch (ClassNotFoundException e) {
 				System.out.println("Error dans HDFS Server");
 				e.printStackTrace();
-			}	
+		} catch (UnknownHostException e){
+			e.printStackTrace();
+		} catch (IOException e){
+			e.printStackTrace();
+		}
 		
 		
 	}

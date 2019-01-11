@@ -87,7 +87,7 @@ public class HdfsClient {
             oos1.writeObject(fichier.getName()+"V");
             oos1.writeObject(fmt);
             oos1.writeObject(str1);
-            
+
             String str2 = new String();
             for (int j=0; j<quotient+reste; j++){
             	str2+= buff.readLine()+"\n";
