@@ -23,10 +23,18 @@ public class Job extends Thread implements JobInterface  {
     private HashMap<String,Boolean> listeEtatDaemon;
     // Adresse du Job.
     private String monAdresse;
+    
+    /// Gestion du fichier de calcul :
     //
     private Format.Type typeFichier;
     //
     private String nomFichier;
+
+    /// Gestion du fichier de retour
+    private Format.Type typeFichierSortie;
+    //
+    private String nomFichierSortie;
+
 
     // Constructeur :
     public Job(){
@@ -67,9 +75,9 @@ public class Job extends Thread implements JobInterface  {
                 Daemon node = (Daemon) Naming.lookup(url);
                 String id = entry.getKey();
                 listeNode.put(id, node);
-                listeEtatDaemon.put(id, false);
+                listeEtatDaemon.put(id, false); // Variables conditions. //
                 Callback cb = new CallbackImpl(monAdresse, id);
-                //node.runMap((Mapper) mr, , writer, cb); // Format tout ça...
+                node.runMap(mr, typeFichier, typeFichier, cb);
         	}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -82,12 +90,10 @@ public class Job extends Thread implements JobInterface  {
             for( Map.Entry<String, Boolean> entry : listeEtatDaemon.entrySet()){
                 cond = (cond && entry.getValue());
             }
-            wait(); // On gêle en attedant les notifys.
+            wait(); // On gêle en attedant les notifs.
         }
     	
-        // Reduce //
-        //  TODO  //
-        // ------ //
+        
     		
     }
 
