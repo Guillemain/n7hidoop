@@ -134,7 +134,7 @@ public class Job extends Thread implements JobInterface {
                 listeEtatDaemon.put(id, false);
                 Callback cb = (Callback) new CallbackImpl(urlCB, id);
                 node.runMap((Mapper) mr,(Format) null, (Format) null, cb); // Format tout ça...
-                //node.ping(cb);
+                //node.ping(cb);//
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -164,7 +164,7 @@ public class Job extends Thread implements JobInterface {
         }
     	System.out.println(" fin des Calculs ! =>");
         // Reduce //
-        // TODO   //
+        // TODO:   //
         // ------ //
         
         System.err.println("FINI");
