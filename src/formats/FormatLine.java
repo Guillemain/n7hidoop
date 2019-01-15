@@ -34,8 +34,7 @@ public class FormatLine implements Format {
     }
 
 	@Override
-	public KV read() {
-		
+	public KV read() {	
 		String line = null;
 		if(oLect){
 			try{

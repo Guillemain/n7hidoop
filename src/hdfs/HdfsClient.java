@@ -4,8 +4,8 @@
 package hdfs;
 import formats.Format;
 import formats.KV;
-//import formats.KVFormat;
-//import formats.LineFormat;
+import formats.FormatKV;
+import formats.FormatLine;
 import formats.Commande;
 
 import java.io.*;
@@ -15,6 +15,16 @@ import java.util.List;
 
 public class HdfsClient {
 
+	// Tableau des sockets pour les differents serveurs
+	private static Socket[] sock ;
+	// Tableau des ObjectOutpuStream pour les differents serveurs
+	private static ObjectOutputStream [] oos;
+	// Tableau des ObjectInpuStream pour les differents serveurs
+	private static ObjectInputStream[] ois;
+	// Liste des noms de machines sur lesquels les serveurs ont été déployé
+	private static List<String> listeMachine = new ArrayList<>();
+	
+	
     private static void usage() {
         System.out.println("Usage: java HdfsClient read <file>");
         System.out.println("Usage: java HdfsClient write <line|kv> <file>");
@@ -25,38 +35,21 @@ public class HdfsClient {
     	System.out.println("Demande de suppression");
     	
     	try {
-    		List<String> listeMachine = new ArrayList<>();
-			BufferedReader reader = new BufferedReader(new FileReader("../config/listeMachines.txt"));
-		    String line;
-		    while ((line = reader.readLine()) != null)
-		    {
-		    	listeMachine.add(line);
-		    }
-		  	reader.close();
-		  	System.out.println(listeMachine);
+    		
+    		for (int i = 0; i< listeMachine.size();i++){
+    			//Ouverture socket 
+		  		sock[i] = new Socket(listeMachine.get(i), (5000+i));
+		  		oos[i] = new ObjectOutputStream(sock[i].getOutputStream());
+		  		ois[i] = new ObjectInputStream(sock[i].getInputStream());
+		  		
+		  		//Envoie de la commande et du nom du fichier
+		  		oos[i].writeObject(Commande.CMD_DELETE);
+	            oos[i].writeObject(hdfsFname + String.valueOf(i));
+	            
+	            oos[i].close();
+	            ois[i].close();
+		  	}
 
-    	
-//    		Socket sock1 = new Socket ("verlaine",4000);
-//            ObjectOutputStream oos1 = new ObjectOutputStream(sock1.getOutputStream());
-//            ObjectInputStream ois1 = new ObjectInputStream(sock1.getInputStream());
-//            
-//            Socket sock2 = new Socket ("rocket",2207);
-//            ObjectOutputStream oos2 = new ObjectOutputStream(sock2.getOutputStream());
-//            ObjectInputStream ois2 = new ObjectInputStream(sock2.getInputStream());
-//            
-//            
-//            oos1.writeObject(Commande.CMD_DELETE);
-//            oos1.writeObject(hdfsFname);
-//            
-//            oos2.writeObject(Commande.CMD_DELETE);
-//            oos2.writeObject(hdfsFname);
-//            
-//            oos2.close();
-//            ois2.close();
-//            
-//            oos1.close();
-//            ois1.close();
-            
     	} catch (Exception e) {
     		System.out.println("Erreur HdfdDelate (Client)");
     		e.printStackTrace();
@@ -69,14 +62,6 @@ public class HdfsClient {
     	
     	try {
     		File fichier = new File(localFSSourceFname);
-    		Socket sock1 = new Socket ("verlaine",4000);
-            ObjectOutputStream oos1 = new ObjectOutputStream(sock1.getOutputStream());
-            ObjectInputStream ois1 = new ObjectInputStream(sock1.getInputStream());
-            
-            Socket sock2 = new Socket ("rocket",2207);
-            ObjectOutputStream oos2 = new ObjectOutputStream(sock2.getOutputStream());
-            ObjectInputStream ois2 = new ObjectInputStream(sock2.getInputStream());
-            
             FileReader fr = new FileReader(fichier);
             BufferedReader buff = new BufferedReader(fr);
             
@@ -88,35 +73,35 @@ public class HdfsClient {
             }
             buff.reset();
             
-            int quotient = nbLigne/2; //2 = Nb de serveurs
-            int reste = nbLigne%2;
+            int quotient = nbLigne/listeMachine.size(); 
+            int reste = nbLigne%listeMachine.size();
             
-            //On envoie les donnes
-            String str1 = new String();
-            for (int j=0; j<quotient; j++){
-            	str1+= buff.readLine()+"\n";
-            }
-            
-            oos1.writeObject(Commande.CMD_WRITE);
-            oos1.writeObject(fichier.getName()+"V");
-            oos1.writeObject(fmt);
-            oos1.writeObject(str1);
+			for (int i = 0; i < listeMachine.size(); i++) {
+				// Ouverture socket
+				sock[i] = new Socket(listeMachine.get(i), (5000 + i));
+				oos[i] = new ObjectOutputStream(sock[i].getOutputStream());
+				ois[i] = new ObjectInputStream(sock[i].getInputStream());
+				
+				
+				// On envoie les donnes
+				String str = new String();
+				if (i == listeMachine.size()){
+					for (int j = 0; j < quotient; j++) {
+						str += buff.readLine() + "\n";
+					}
+				} else {
+					for (int j = 0; j < quotient + reste; j++) {
+						str += buff.readLine() + "\n";
+					}
+				}
 
-            String str2 = new String();
-            for (int j=0; j<quotient+reste; j++){
-            	str2+= buff.readLine()+"\n";
-            }
+				//Envoie de la commande et des donnes
+				oos[i].writeObject(Commande.CMD_WRITE);
+				oos[i].writeObject(fichier.getName() + String.valueOf(i));
+				oos[i].writeObject(fmt);
+				oos[i].writeObject(str);
+			}
             
-            oos2.writeObject(Commande.CMD_WRITE);
-            oos2.writeObject(fichier.getName()+"R");
-            oos2.writeObject(fmt);
-            oos2.writeObject(str2);
-            
-            oos2.close();
-            ois2.close();
-            
-            oos1.close();
-            ois1.close();
     		
     	} catch (Exception e) {
     		System.out.println("Erreur HdfdWrite (Client)");
@@ -129,46 +114,41 @@ public class HdfsClient {
         System.out.println("Demande de lecture");
         File fichier = new File(localFSDestFname);
         try {
-        	FileWriter fw = new FileWriter(fichier);
-        	
-        	Socket sock1 = new Socket ("verlaine",4000);
-            ObjectOutputStream oos1 = new ObjectOutputStream(sock1.getOutputStream());
-            ObjectInputStream ois1 = new ObjectInputStream(sock1.getInputStream());
-            
-            Socket sock2 = new Socket ("rocket",2207);
-            ObjectOutputStream oos2 = new ObjectOutputStream(sock2.getOutputStream());
-            ObjectInputStream ois2 = new ObjectInputStream(sock2.getInputStream());
-       
-            oos1.writeObject(Commande.CMD_READ);
-            oos1.writeObject(hdfsFname+"V");
-            
-            oos2.writeObject(Commande.CMD_READ);
-            oos2.writeObject(hdfsFname+"R");
-        
-            try {
-            	String receive = (String) ois1.readObject();
-            	fw.write(receive,0,receive.length());
-            	
-            	String receive2 = (String) ois2.readObject();
-            	fw.write(receive2,0,receive2.length());
-            	
-            } catch (UnknownHostException e) {
-    			System.out.println(" Un des hosts n'est pas reconnu lors de la reception  ");
-    			e.printStackTrace();
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		} catch (ClassNotFoundException e) {
-    			System.out.println(" Objet non reconnu pendant la reception");
-    			e.printStackTrace();
-    		}
-            fw.close();
-            oos2.close();
-            ois2.close();
-            
-            oos1.close();
-            ois1.close();
+			FileWriter fw = new FileWriter(fichier);
 
-            System.out.println("Ecriture des données dans le fichier local src/resultat.txt");
+			for (int i = 0; i < listeMachine.size(); i++) {
+				// Ouverture socket
+				sock[i] = new Socket(listeMachine.get(i), (5000 + i));
+				oos[i] = new ObjectOutputStream(sock[i].getOutputStream());
+				ois[i] = new ObjectInputStream(sock[i].getInputStream());
+
+				oos[i].writeObject(Commande.CMD_READ);
+				oos[i].writeObject(hdfsFname + String.valueOf(i));
+
+				try {
+					// Lecture du fichier reçu
+					String receive = (String) ois[i].readObject();
+					// Ecriture du résultat dans le fichier local
+					fw.write(receive, 0, receive.length());
+
+				} catch (UnknownHostException e) {
+					System.out.println(" Un des hosts n'est pas reconnu lors de la reception  ");
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					System.out.println(" Objet non reconnu pendant la reception");
+					e.printStackTrace();
+				}
+				
+				oos[i].close();
+				ois[i].close();
+
+			}
+			
+			fw.close();
+			
+            System.out.println("Ecriture des données dans le fichier local ");
         } catch (Exception e) {
             System.out.println("Erreur HdfsRead (Client)");
             e.printStackTrace();
@@ -181,10 +161,29 @@ public class HdfsClient {
         // java HdfsClient <read|write> <line|kv> <file>
 
         try {
-            if (args.length<2) {usage(); return;}
+        	
+			// Récupérer le nom des machines serveurs
+			BufferedReader reader = new BufferedReader(new FileReader("../config/listeMachines.txt"));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				listeMachine.add(line);
+			}
+			reader.close();
+
+			// Initialiser les tableaux
+			sock = new Socket[listeMachine.size()];
+			oos = new ObjectOutputStream[listeMachine.size()];
+			ois = new ObjectInputStream[listeMachine.size()];
+
+
+			//Main
+			if (args.length < 2) {
+				usage();
+				return;
+			}
 
             switch (args[0]) {
-              case "read": HdfsRead(args[1],"/home/mpelissi/workspace_jee/hidoop/src/resultat.txt"); break;
+              case "read": HdfsRead(args[1],args[1]+".resultat"); break; //Fichier local : meme nom et extensions .resultat
               case "delete": HdfsDelete(args[1]); break;
               case "write": 
                 Format.Type fmt;

@@ -30,6 +30,7 @@ public class HdfsServer extends Thread {
 		System.out.println("Serveur démarré sur le port : " + args[0]);
 
 		while (true) {
+			//Creation d'un thread
 			Thread t = new HdfsServer(ss.accept());
 			t.start();
 		}
@@ -44,12 +45,13 @@ public class HdfsServer extends Thread {
 				ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
             	ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
 		
-		
+				//Lecture de la commande
 				Commande cmd = (Commande) ois.readObject();
 				
 				switch(cmd){
 				case CMD_READ:
 					System.out.println("Demande de lecture reçue par le serveur");
+					//Lecture du nom du fichier
 					String fnameR = (String) ois.readObject();
 					FileReader fr = new FileReader(fnameR);
 					BufferedReader buff = new BufferedReader(fr);
@@ -67,7 +69,9 @@ public class HdfsServer extends Thread {
 					break;
 				case CMD_WRITE:
 					System.out.println("Demande d'écriture reçue par le serveur");
+					//Lecture du nom du fichier
 					String fnameW = (String) ois.readObject();
+					//Lecture du type du format
 					Type fmtW = (Type) ois.readObject();
 					
 					FileWriter fw = new FileWriter(fnameW);
@@ -86,6 +90,7 @@ public class HdfsServer extends Thread {
 					break;
 				case CMD_DELETE:
 					System.out.println("Demande de suppresion reçue par le serveur");
+					//Lecture du nom du fichier
 					String fnameD = (String) ois.readObject();
 					File f = new File(fnameD);
 					f.delete();
