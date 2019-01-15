@@ -56,6 +56,13 @@ public class DaemonImpl extends UnicastRemoteObject implements Daemon {
 
     public void runMap(Mapper m, Format reader, Format writer, Callback cb) {
     	// Jouer avec les formats...
+    	try {
+			reader.open(Format.OpenMode.R);
+			writer.open(Format.OpenMode.W);
+		} catch (Exception e) {
+			System.err.println("Erreur dans l'ouverture du fichier !");
+		}
+    	//
         System.out.print("<=" + nomDuDaemon + "Requête reçue :"); // tout est dit ?
         m.map(reader, writer);
         System.out.print(" - Traitement fini - ");
@@ -67,6 +74,12 @@ public class DaemonImpl extends UnicastRemoteObject implements Daemon {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try {
+			reader.close();
+			writer.close();
+		} catch (Exception e) {
+			System.err.println("Erreur dans la fermeture du fichier !");
+		}
     }
 
 
