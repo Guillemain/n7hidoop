@@ -2,10 +2,10 @@
 #@autor Guillemain
 chemin=`pwd`
 clear
-echo "\t_____________________________________"
-echo "\t|                                   |"
-echo "\t| Lacement des Daemons de Hidoo V.0 |"
-echo "\t|___________________________________|"
+echo "\t_______________________________________"
+echo "\t|                                     |"
+echo "\t| Lancement des Daemons de Hidoop V.0 |"
+echo "\t|_____________________________________|"
 echo ""
 echo " Deploiement pour les machines suivantes : "
 
