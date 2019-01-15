@@ -15,7 +15,7 @@ public class testJob {
 			listenodes.put(args[i], args[i+1]);
 		}
 		System.out.println(listenodes);
-		Job job = new Job(listenodes);
+		Job job = new Job();
 		MapReduce map = new MapReduce() {
 			
 

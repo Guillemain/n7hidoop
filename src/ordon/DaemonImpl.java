@@ -1,7 +1,10 @@
 package ordon;
 
+import java.net.InetAddress;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 import formats.Format;
@@ -17,7 +20,34 @@ import map.Mapper;
  */
 /* A exécuter sur les machines serveur */
 public class DaemonImpl extends UnicastRemoteObject implements Daemon {
+	
+	String nomDuDaemon="DaemonSansNom";
+	public String getNomDuDaemon() {
+		return nomDuDaemon;
+	}
 
+	public void setNomDuDaemon(String nomDuDaemon) {
+		this.nomDuDaemon = nomDuDaemon;
+	}
+	
+	public static void main(String[] args) {
+        try {
+            // Creation du serveur des noms : 
+        	Registry reg = LocateRegistry.createRegistry(60000);
+            // On crée l'objet serveur
+            Daemon srvDaemon = new DaemonImpl();
+            // On nomme le daemon (utile pour le debuguage)
+            ((DaemonImpl) srvDaemon).setNomDuDaemon(InetAddress.getLocalHost().getHostName());
+            // On crée l'url
+            String url = "//" + InetAddress.getLocalHost().getHostName()+":"+ args[1]+"/Daemon";
+            // On s'enregistre au près du serveur des noms :
+            Naming.rebind(url, srvDaemon);
+            System.out.println("<= Daemon lancé à l'url : " + url +" =>");
+        } catch (Exception exe) {
+            System.out.println("ERREUR, fin du daemon.");
+            exe.printStackTrace();
+        }
+    }
 
     protected DaemonImpl() throws RemoteException {
         super();
@@ -25,13 +55,14 @@ public class DaemonImpl extends UnicastRemoteObject implements Daemon {
     }
 
     public void runMap(Mapper m, Format reader, Format writer, Callback cb) {
-        System.out.println("<= Requête reçue :"); // tout est dit ?
+    	// Jouer avec les formats...
+        System.out.print("<=" + nomDuDaemon + "Requête reçue :"); // tout est dit ?
         m.map(reader, writer);
-        System.out.println(" - Traitement fini - ");
+        System.out.print(" - Traitement fini - ");
         try {
             System.out.print(" => On annonce au mainNode que nous avons terminé : ");
-            GestionnaireCB gcb = (GestionnaireCB) Naming.lookup(cb.getAdresseRetour());
-            gcb.notifierFinCalcul(cb.getID());
+            GestionnaireCB gcb = (GestionnaireCB) Naming.lookup(cb.getAdresseRetour()); //On recupère le gcb 
+            gcb.notifierFinCalcul(cb.getID()); // On notifie le gcb qui va à son tour notifier Job.
             System.out.println(" => annonce passée.");
         } catch (Exception e) {
             e.printStackTrace();
@@ -41,7 +72,7 @@ public class DaemonImpl extends UnicastRemoteObject implements Daemon {
 	@Override
 	public void ping(Callback cb) throws RemoteException {
 		try {
-            System.out.print(" => On annonce au mainNode que nous avons terminé : ");
+            System.out.print(" => " + nomDuDaemon + " On annonce au mainNode que nous avons été pingué ! : ");
             GestionnaireCB gcb = (GestionnaireCB) Naming.lookup(cb.getAdresseRetour());
             gcb.notifierFinCalcul(cb.getID());
             System.out.println(" => annonce passée.");

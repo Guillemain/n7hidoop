@@ -4,12 +4,16 @@ import map.MapReduce;
 import map.Mapper;
 import formats.Format;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -35,15 +39,22 @@ public class Job extends Thread implements JobInterface {
 
     // Constructeur :
     public Job() {
-
+    	try {
+    		listeMachine = new HashMap<>();
+			BufferedReader reader = new BufferedReader(new FileReader("../config/listeMachines.txt"));
+		    String line;
+		    while ((line = reader.readLine()) != null)
+		    {
+		    	listeMachine.put(line, ("//" + line + ":"+ "6000" +"/Daemon"));
+		    }
+		  	reader.close();
+		} catch (Exception e) {
+			System.err.println("config/listeMachines.txt absent.");
+		}
     }
 
     public Job(HashMap<String, String> li) {
         this.listeMachine = li;
-    }
-
-    public Job(String ad) {
-        monAdresse = ad;
     }
 
     // Méthodes requises pour la classe Job
@@ -58,6 +69,7 @@ public class Job extends Thread implements JobInterface {
 
     // Méthodes requises pour la classe Job
     public void startJob(MapReduce mr) {
+    	
         listeNode = new HashMap<>();
         listeEtatDaemon = new HashMap<>();
         System.out.println(" <= Lancement du Map-Reduce =>");
@@ -70,7 +82,7 @@ public class Job extends Thread implements JobInterface {
             	Registry reg = LocateRegistry.createRegistry(6969);
                 Naming.rebind(urlCB, newGCBI);
                 System.out.print(urlCB);
-                System.out.println(" => Server lancé");
+                System.out.println(" => Server GCB lancé \n \n \n ");
             } catch (Exception e) {
                 System.err.println("ERREUR dans la création de l'url du GCB");
                 e.printStackTrace();
@@ -98,7 +110,6 @@ public class Job extends Thread implements JobInterface {
         }
         System.out.println(" Contact terminé =>");
         System.out.println(" <= Attente des résultats ...");
-
         boolean cond = false; // <- Condition de fin d'attente.
         while (!cond) {
         	cond = true;
@@ -118,7 +129,6 @@ public class Job extends Thread implements JobInterface {
         // Reduce //
         // TODO   //
         // ------ //
-
     }
 
     /**

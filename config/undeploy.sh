@@ -1,4 +1,5 @@
 #!/bin/bash
+#@autor Guillemain
 chemin=`pwd`
 clear
 echo ""
