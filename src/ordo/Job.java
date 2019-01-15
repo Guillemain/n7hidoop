@@ -13,6 +13,8 @@ import com.sun.xml.internal.bind.v2.TODO;
 
 /**
  * @author Guillemain Implémentation de JobInterface;
+ * 
+ * 
  */
 public class Job extends Thread implements JobInterface  {
     // La liste des machines où se trouve un daemon.
@@ -75,8 +77,9 @@ public class Job extends Thread implements JobInterface  {
 			e.printStackTrace();
 		}
     	System.out.println(" Contacte terminé =>");
-        System.out.println(" <= Attente des résultats ...");
+        System.out.print(" <= Attente de la fin des calculs du deamon ...");
         
+
         boolean cond = false; // <- Condition de fin d'attente.
         while(!cond){
             for( Map.Entry<String, Boolean> entry : listeEtatDaemon.entrySet()){
@@ -84,7 +87,7 @@ public class Job extends Thread implements JobInterface  {
             }
             wait(); // On gêle en attedant les notifys.
         }
-    	
+    	System.out.println(" fin des Calculs ! =>");
         // Reduce //
         //  TODO  //
         // ------ //

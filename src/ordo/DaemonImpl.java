@@ -10,10 +10,10 @@ import map.Mapper;
 
 /**
  * @author Guillemain : Guillemain, Implémentation de l'interface Daemon. Id Est
- *         : Le serveur qui trourne sur la machine dans l'espoire qu'un jour,
+ *         : Le serveur qui trourne sur la machine dans l'espoir qu'un jour,
  *         lui donne une tâche à accomplir.
  * 
- *         $ > java Daemon.class URL
+ *         $ > java Daemon URL
  * 
  */
 /* A exécuter sur les machines serveur */
@@ -48,7 +48,5 @@ public class DaemonImpl extends UnicastRemoteObject implements Daemon {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
     }
-
 }
