@@ -3,6 +3,7 @@ package ordo;
 import map.MapReduce;
 import map.Mapper;
 import formats.Format;
+import formats.FormatImpl;
 import formats.FormatReader;
 import formats.FormatWriter;
 
@@ -118,13 +119,20 @@ public class Job extends Thread implements JobInterface {
                 System.err.println("ERREUR dans la création de l'url du GCB");
                 e.printStackTrace();
             }
+            //Le format de travail à utiliser pour les daemons
+            Format fmtLect = new FormatImpl(nomFichier,typeFichier);
+            
             
             System.out.print(" <= Contact des Daemons :");
             /**
              * Pour chaque daemon on crée un Callback avec son identifiant. On met à jour
-             * aussi la table des Daemon en cours de calculs.
+             * aussi la table des Daemon en cours de calculs. ainsi que le format..
              */
             for (Map.Entry<String, String> entry : listeMachine.entrySet()) {
+            	//On cree aussi leformat de retour:
+            	
+            	Format fmEcrt = new FormatImpl(nomFichier + entry.getKey(),typeFichier);
+            	
                 String url = entry.getValue();
                 System.out.print(" -> Recherche du Daemon : " + url);
                 Daemon node = (Daemon) Naming.lookup(url);
@@ -133,7 +141,7 @@ public class Job extends Thread implements JobInterface {
                 listeNode.put(id, node);
                 listeEtatDaemon.put(id, false);
                 Callback cb = (Callback) new CallbackImpl(urlCB, id);
-                node.runMap((Mapper) mr,(Format) null, (Format) null, cb); // Format tout ça...
+                node.runMap((Mapper) mr, fmtLect, fmEcrt, cb);
                 //node.ping(cb);
             }
         } catch (Exception e) {
@@ -146,10 +154,10 @@ public class Job extends Thread implements JobInterface {
         	moniteur.lock();
         	cond = true;
             for (Map.Entry<String, Boolean> entry : listeEtatDaemon.entrySet()) {
-            	System.out.println(entry.getKey() + entry.getValue());
+            	//System.out.println(entry.getKey() + entry.getValue());
                 cond = (cond && entry.getValue());
             }
-            System.out.println(cond);
+            //System.out.println(cond);
             if (!cond) {
 	            try { // On gêle en attedant les notifys.
 	                GpasFINI.await();
@@ -163,8 +171,14 @@ public class Job extends Thread implements JobInterface {
             moniteur.unlock();
         }
     	System.out.println(" fin des Calculs ! =>");
+    	
         // Reduce //
-        // TODO   //
+        // TODO 
+    	/*
+    	 * On sait ce qu'on doit faire : il faut garder les fmtEcrt qu'on a
+    	 * instancier plus haut et les ouvrire un par un en lecture puis appliquer le reduce dessus.
+    	 * On a pas et le temps mais on en démord pas on va le faire !
+    	 */
         // ------ //
         
         System.err.println("FINI");
