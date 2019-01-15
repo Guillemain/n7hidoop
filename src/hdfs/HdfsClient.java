@@ -1,5 +1,6 @@
 /* une PROPOSITION de squelette, incomplète et adaptable... */
 
+
 package hdfs;
 import formats.Format;
 import formats.KV;
@@ -9,6 +10,8 @@ import formats.Commande;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HdfsClient {
 
@@ -22,26 +25,37 @@ public class HdfsClient {
     	System.out.println("Demande de suppression");
     	
     	try {
-    		Socket sock1 = new Socket ("verlaine",4000);
-            ObjectOutputStream oos1 = new ObjectOutputStream(sock1.getOutputStream());
-            ObjectInputStream ois1 = new ObjectInputStream(sock1.getInputStream());
-            
-            Socket sock2 = new Socket ("rocket",2207);
-            ObjectOutputStream oos2 = new ObjectOutputStream(sock2.getOutputStream());
-            ObjectInputStream ois2 = new ObjectInputStream(sock2.getInputStream());
-            
-            
-            oos1.writeObject(Commande.CMD_DELETE);
-            oos1.writeObject(hdfsFname+"V");
-            
-            oos2.writeObject(Commande.CMD_DELETE);
-            oos2.writeObject(hdfsFname+"R");
-            
-            oos2.close();
-            ois2.close();
-            
-            oos1.close();
-            ois1.close();
+    		List<String> listeMachine = new ArrayList<>();
+			BufferedReader reader = new BufferedReader(new FileReader("../config/listeMachines.txt"));
+		    String line;
+		    while ((line = reader.readLine()) != null)
+		    {
+		    	listeMachine.add(line);
+		    }
+		  	reader.close();
+		  	System.out.println(listeMachine);
+
+    	
+//    		Socket sock1 = new Socket ("verlaine",4000);
+//            ObjectOutputStream oos1 = new ObjectOutputStream(sock1.getOutputStream());
+//            ObjectInputStream ois1 = new ObjectInputStream(sock1.getInputStream());
+//            
+//            Socket sock2 = new Socket ("rocket",2207);
+//            ObjectOutputStream oos2 = new ObjectOutputStream(sock2.getOutputStream());
+//            ObjectInputStream ois2 = new ObjectInputStream(sock2.getInputStream());
+//            
+//            
+//            oos1.writeObject(Commande.CMD_DELETE);
+//            oos1.writeObject(hdfsFname);
+//            
+//            oos2.writeObject(Commande.CMD_DELETE);
+//            oos2.writeObject(hdfsFname);
+//            
+//            oos2.close();
+//            ois2.close();
+//            
+//            oos1.close();
+//            ois1.close();
             
     	} catch (Exception e) {
     		System.out.println("Erreur HdfdDelate (Client)");
