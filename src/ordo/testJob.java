@@ -1,4 +1,4 @@
-package ordon;
+package ordo;
 
 import java.util.HashMap;
 
@@ -16,9 +16,9 @@ public class testJob {
 		}
 		System.out.println(listenodes);
 		Job job = new Job();
+		job.setPortDaemons(Integer.valueOf(args[0]));
 		MapReduce map = new MapReduce() {
 			
-
 			@Override
 			public void reduce(FormatReader reader, FormatWriter writer) {
 				System.out.println("Reduce !");

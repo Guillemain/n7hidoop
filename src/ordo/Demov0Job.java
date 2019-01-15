@@ -1,4 +1,4 @@
-package ordon;
+package ordo;
 
 import map.MapReduce;
 import map.Mapper;

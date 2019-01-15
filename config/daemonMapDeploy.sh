@@ -16,7 +16,7 @@ done
 #Lancement
 for i in $*;
 do
-ssh $i "cd $chemin && java ordon/DaemonImpl "& 
+ssh $i "cd $chemin && java ordo/DaemonImpl 5510"& 
 echo ""
 done
 echo ""

@@ -27,7 +27,7 @@ public class HdfsServer extends Thread {
 
 		ServerSocket ss;
 		ss = new ServerSocket(port);
-		System.out.println("Serveur démarré :");
+		System.out.println("Serveur démarré sur le port : " + args[0]);
 
 		while (true) {
 			Thread t = new HdfsServer(ss.accept());

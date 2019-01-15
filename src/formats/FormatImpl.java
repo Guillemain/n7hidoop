@@ -44,7 +44,7 @@ public class FormatImpl implements Format{
             if (mode == OpenMode.R){
             	System.out.print("Ouverture du fichier " + nameF + " en mode lecture ");
             	oLect = true;
-                //On ouvre le fichie en lecture
+                // On ouvre le fichie en lecture
                 fichier.setReadable(true);
                 fichierLecture = new FileReader(fichier);
                 buffer = new BufferedReader(fichierLecture);
