@@ -4,8 +4,10 @@ import map.MapReduce;
 import map.Mapper;
 import formats.Format;
 import formats.FormatImpl;
+import formats.FormatLine;
 import formats.FormatReader;
 import formats.FormatWriter;
+import hdfs.HdfsClient;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -46,6 +48,8 @@ public class Job extends Thread implements JobInterface {
     private Format.Type typeFichier;
     //
     private String nomFichier;
+
+    static private String prefixeRetour = "Temp_";
     
     Condition GpasFINI;
     
@@ -162,7 +166,7 @@ public class Job extends Thread implements JobInterface {
 	            try { // On gêle en attedant les notifys.
 	                GpasFINI.await();
 	            } catch (Exception e) {
-	                // TODO Auto-generated catch block
+	                // ODO Auto-generated catch block
 	                System.out.println("Problème dans le wait. On echape à la boucle while active, -> Fin du deamon");
 	                e.printStackTrace();
 	                System.exit(0);
@@ -170,7 +174,7 @@ public class Job extends Thread implements JobInterface {
             }
             moniteur.unlock();
         }
-    	System.out.println(" fin des Calculs ! =>");
+    	System.out.print(" Fin des Calculs ! =>");
     	
         // Reduce //
         // TODO 
@@ -180,6 +184,24 @@ public class Job extends Thread implements JobInterface {
     	 * On a pas et le temps mais on en démord pas on va le faire !
     	 */
         // ------ //
+        System.out.print(" Création du fichier des résultats =>");
+        HdfsClient hc = new HdfsClient();
+        hc.HdfsRead(nomFichier, prefixeRetour+nomFichier);
+        System.out.println(" Fichier créé. ");
+
+        try {
+            System.out.print(" Ouverture du fichier => ");
+            Format fmt = new FormatLine(prefixeRetour+nomFichier);
+            // HERE !!!
+
+        } catch (Exception e) {
+           
+        }
+
+        
+
+
+
         
         System.err.println("FINI");
         System.exit(0);

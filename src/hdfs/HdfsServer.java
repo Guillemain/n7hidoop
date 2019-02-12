@@ -53,7 +53,7 @@ public class HdfsServer extends Thread {
 					System.out.println("Demande de lecture reçue par le serveur");
 					//Lecture du nom du fichier
 					String fnameR = (String) ois.readObject();
-					FileReader fr = new FileReader(fnameR);
+					FileReader fr = new FileReader("../data/"+fnameR);
 					BufferedReader buff = new BufferedReader(fr);
 					// Message à envoyer
 					String str = new String();
@@ -74,7 +74,7 @@ public class HdfsServer extends Thread {
 					//Lecture du type du format
 					Type fmtW = (Type) ois.readObject();
 					
-					FileWriter fw = new FileWriter(fnameW);
+					FileWriter fw = new FileWriter("../data/"+fnameW);
 					
 					// Reception du texte
 					String strW = (String) ois.readObject();
