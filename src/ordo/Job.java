@@ -50,6 +50,8 @@ public class Job extends Thread implements JobInterface {
     private String nomFichier;
 
     static private String prefixeRetour = "Temp_";
+
+    private String prefixeResultat = "Result_";  
     
     Condition GpasFINI;
     
@@ -105,15 +107,18 @@ public class Job extends Thread implements JobInterface {
 
     // Méthodes requises pour la classe Job
     public void startJob(MapReduce mr) {
-    	
         listeNode = new HashMap<>();
         listeEtatDaemon = new HashMap<>();
+
+
         System.out.println(" <= Lancement du Map-Reduce =>");
         try {
 
             GestionnaireCB newGCBI = new GestionnaireCBImpl(this);
             System.out.print(" => Lancement du server de gestion des CallBacks à l'adresse : ");
+
             String urlCB = "//" + InetAddress.getLocalHost().getHostName() + ":" + "6969" + "/gcb";
+            
             try {
             	Registry reg = LocateRegistry.createRegistry(6969);
                 Naming.rebind(urlCB, newGCBI);
@@ -123,35 +128,34 @@ public class Job extends Thread implements JobInterface {
                 System.err.println("ERREUR dans la création de l'url du GCB");
                 e.printStackTrace();
             }
-            //Le format de travail à utiliser pour les daemons
-            Format fmtLect = new FormatImpl(nomFichier,typeFichier);
-            
+
             
             System.out.print(" <= Contact des Daemons :");
             /**
              * Pour chaque daemon on crée un Callback avec son identifiant. On met à jour
-             * aussi la table des Daemon en cours de calculs. ainsi que le format..
+             * aussi la table des Daemon en cours de calculs. ainsi que les formats..
              */
             for (Map.Entry<String, String> entry : listeMachine.entrySet()) {
-            	//On cree aussi leformat de retour:
-            	
-            	Format fmEcrt = new FormatImpl(nomFichier + entry.getKey(),typeFichier);
+            	Format fmLect = new FormatLine(entry.getKey()+nomFichier);
+            	Format fmEcrt = new FormatLine(entry.getKey()+prefixeRetour+nomFichier);
             	
                 String url = entry.getValue();
                 System.out.print(" -> Recherche du Daemon : " + url);
                 Daemon node = (Daemon) Naming.lookup(url);
                 System.out.println(" Daemon trouvé !");
+
                 String id = entry.getKey();
                 listeNode.put(id, node);
                 listeEtatDaemon.put(id, false);
                 Callback cb = (Callback) new CallbackImpl(urlCB, id);
-                node.runMap((Mapper) mr,(Format) null, (Format) null, cb); // Format tout ça...
-                //node.ping(cb);//
+                node.runMap((Mapper) mr, fmLect , fmEcrt, cb);
             }
+            System.out.println(" Contact terminé =>");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println(" Contact terminé =>");
+
+        
         System.out.println(" <= Attente des résultats ...");
         boolean cond = false; // <- Condition de fin d'attente.
         while (!cond) {
@@ -174,36 +178,26 @@ public class Job extends Thread implements JobInterface {
             }
             moniteur.unlock();
         }
-    	System.out.print(" Fin des Calculs ! =>");
-    	
-        // Reduce //
-        // TODO 
-    	/*
-    	 * On sait ce qu'on doit faire : il faut garder les fmtEcrt qu'on a
-    	 * instancier plus haut et les ouvrire un par un en lecture puis appliquer le reduce dessus.
-    	 * On a pas et le temps mais on en démord pas on va le faire !
-    	 */
-        // ------ //
+        System.out.print(" Fin des Calculs ! =>");
+        
+        // REDUCE //
         System.out.print(" Création du fichier des résultats =>");
         HdfsClient hc = new HdfsClient();
-        hc.HdfsRead(nomFichier, prefixeRetour+nomFichier);
+        hc.HdfsRead(prefixeRetour+nomFichier, prefixeRetour+nomFichier);
         System.out.println(" Fichier créé. ");
 
         try {
             System.out.print(" Ouverture du fichier => ");
-            Format fmt = new FormatLine(prefixeRetour+nomFichier);
-            // HERE !!!
-
+            Format fmReduce = new FormatLine(prefixeRetour+nomFichier);
+            fmReduce.open(Format.OpenMode.R);
+            Format fmResultat = new FormatLine(prefixeResultat+nomFichier);
+            fmResultat.open(Format.OpenMode.W);
+            System.out.println(" Reduce en cours ...");
+            mr.reduce(fmReduce, fmResultat);
         } catch (Exception e) {
            
-        }
-
-        
-
-
-
-        
-        System.err.println("FINI");
+        }        
+        System.err.println("FIN, fichier de résultat enregistré au nom de : " + prefixeResultat + nomFichier);
         System.exit(0);
     }
 

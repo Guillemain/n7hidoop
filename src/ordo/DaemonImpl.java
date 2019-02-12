@@ -20,7 +20,8 @@ import map.Mapper;
  */
 /* A exécuter sur les machines serveur */
 public class DaemonImpl extends UnicastRemoteObject implements Daemon {
-	
+    
+    private static String path = "../data";
 	String nomDuDaemon="DaemonSansNom";
 	public String getNomDuDaemon() {
 		return nomDuDaemon;
@@ -55,8 +56,12 @@ public class DaemonImpl extends UnicastRemoteObject implements Daemon {
     }
 
     public void runMap(Mapper m, Format reader, Format writer, Callback cb) {
-    	// Jouer avec les formats...
+        // Jouer avec les formats...
+        
     	try {
+            //On ajoute le path
+            reader.setFname(path + reader.getFname());
+            writer.setFname(path + writer.getFname());
 			reader.open(Format.OpenMode.R);
 			writer.open(Format.OpenMode.W);
 		} catch (Exception e) {

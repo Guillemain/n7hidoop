@@ -23,6 +23,8 @@ public class HdfsClient {
 	private static ObjectInputStream[] ois;
 	// Liste des noms de machines sur lesquels les serveurs ont été déployé
 	private static List<String> listeMachine = new ArrayList<>();
+
+	private static String path = "../data";
 	
 
 	public HdfsClient() {
@@ -50,9 +52,9 @@ public class HdfsClient {
         System.out.println("Usage: java HdfsClient delete <file>");
     }
 	
-    public void HdfsDelete(String hdfsFname) {
+    public void HdfsDelete(String nom) {
     	System.out.println("Demande de suppression");
-    	
+    	String hdfsFname = path + nom;
     	try {
     		
     		for (int i = 0; i< listeMachine.size();i++){
@@ -75,9 +77,11 @@ public class HdfsClient {
     	}
     }
 	
-    public void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
+    public void HdfsWrite(Format.Type fmt, String sourceFname, 
      int repFactor) { 
-    	System.out.println("Demande d'écriture");
+		System.out.println("Demande d'écriture");
+		
+		String localFSSourceFname = path +  sourceFname;
     	
     	try {
     		File fichier = new File(localFSSourceFname);
@@ -129,7 +133,11 @@ public class HdfsClient {
     	
     }
 
-    public void HdfsRead(String hdfsFname, String localFSDestFname) {
+    public void HdfsRead(String nom, String destFname) {
+
+		String localFSDestFname = path +  destFname;
+		String hdfsFname = path + nom;
+
         System.out.println("Demande de lecture");
         File fichier = new File(localFSDestFname);
         try {
