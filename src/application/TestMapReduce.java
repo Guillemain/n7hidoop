@@ -31,11 +31,12 @@ public class TestMapReduce {
 			public void reduce(FormatReader reader, FormatWriter writer) {
                 KV premiereLigne =  reader.read();
                 System.out.println(premiereLigne.v);
-                writer.write(premiereLigne.v);
+                writer.write(premiereLigne);
 			}
 			
 			@Override
 			public void map(FormatReader reader, FormatWriter writer) {
+				KV kv;
 				while ((kv = reader.read()) != null) {
 					System.out.println(reader.read().v);
 				}
