@@ -37,10 +37,11 @@ public class TestMapReduce {
 			@Override
 			public void map(FormatReader reader, FormatWriter writer) {
 				while ((kv = reader.read()) != null) {
-                    System.out.println(reader.read().v);
+					System.out.println(reader.read().v);
+				}
 			}
-        };
-        
+		};
 		job.startJob(map);
+		
 	}
 }
