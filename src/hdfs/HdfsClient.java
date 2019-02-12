@@ -24,6 +24,25 @@ public class HdfsClient {
 	// Liste des noms de machines sur lesquels les serveurs ont été déployé
 	private static List<String> listeMachine = new ArrayList<>();
 	
+
+	public HdfsClient() {
+		try {
+		// Récupérer le nom des machines serveurs
+			BufferedReader reader = new BufferedReader(new FileReader("../config/listeMachines.txt"));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				listeMachine.add(line);
+			}
+			reader.close();
+
+			// Initialiser les tableaux
+			sock = new Socket[listeMachine.size()];
+			oos = new ObjectOutputStream[listeMachine.size()];
+			ois = new ObjectInputStream[listeMachine.size()];
+		} catch (Exception ex) {
+            ex.printStackTrace();
+        }
+	}
 	
     private static void usage() {
         System.out.println("Usage: java HdfsClient read <file>");
@@ -31,7 +50,7 @@ public class HdfsClient {
         System.out.println("Usage: java HdfsClient delete <file>");
     }
 	
-    public static void HdfsDelete(String hdfsFname) {
+    public void HdfsDelete(String hdfsFname) {
     	System.out.println("Demande de suppression");
     	
     	try {
@@ -44,7 +63,7 @@ public class HdfsClient {
 		  		
 		  		//Envoie de la commande et du nom du fichier
 		  		oos[i].writeObject(Commande.CMD_DELETE);
-	            oos[i].writeObject(hdfsFname + String.valueOf(i));
+	            oos[i].writeObject(listeMachine.get(i) + hdfsFname);
 	            
 	            oos[i].close();
 	            ois[i].close();
@@ -56,7 +75,7 @@ public class HdfsClient {
     	}
     }
 	
-    public static void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
+    public void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
      int repFactor) { 
     	System.out.println("Demande d'écriture");
     	
@@ -97,7 +116,7 @@ public class HdfsClient {
 
 				//Envoie de la commande et des donnes
 				oos[i].writeObject(Commande.CMD_WRITE);
-				oos[i].writeObject(fichier.getName() + String.valueOf(i));
+				oos[i].writeObject(listeMachine.get(i) + fichier.getName());
 				oos[i].writeObject(fmt);
 				oos[i].writeObject(str);
 			}
@@ -110,7 +129,7 @@ public class HdfsClient {
     	
     }
 
-    public static void HdfsRead(String hdfsFname, String localFSDestFname) {
+    public void HdfsRead(String hdfsFname, String localFSDestFname) {
         System.out.println("Demande de lecture");
         File fichier = new File(localFSDestFname);
         try {
@@ -123,7 +142,7 @@ public class HdfsClient {
 				ois[i] = new ObjectInputStream(sock[i].getInputStream());
 
 				oos[i].writeObject(Commande.CMD_READ);
-				oos[i].writeObject(hdfsFname + String.valueOf(i));
+				oos[i].writeObject(listeMachine.get(i) + hdfsFname );
 
 				try {
 					// Lecture du fichier reçu
@@ -148,9 +167,9 @@ public class HdfsClient {
 			
 			fw.close();
 			
-            System.out.println("Ecriture des données dans le fichier local ");
+            System.out.println("HdfsRead données dans le fichier local ");
         } catch (Exception e) {
-            System.out.println("Erreur HdfsRead (Client)");
+            System.out.println("HdfsRead (Client)");
             e.printStackTrace();
         }
 
@@ -161,20 +180,26 @@ public class HdfsClient {
         // java HdfsClient <read|write> <line|kv> <file>
 
         try {
+
+			// TO DO : faire un constructeur décent. 
+			// Gerer les noms. 
+			//  
         	
-			// Récupérer le nom des machines serveurs
-			BufferedReader reader = new BufferedReader(new FileReader("../config/listeMachines.txt"));
-			String line;
-			while ((line = reader.readLine()) != null) {
-				listeMachine.add(line);
-			}
-			reader.close();
+			// // Récupérer le nom des machines serveurs
+			// BufferedReader reader = new BufferedReader(new FileReader("../config/listeMachines.txt"));
+			// String line;
+			// while ((line = reader.readLine()) != null) {
+			// 	listeMachine.add(line);
+			// }
+			// reader.close();
 
-			// Initialiser les tableaux
-			sock = new Socket[listeMachine.size()];
-			oos = new ObjectOutputStream[listeMachine.size()];
-			ois = new ObjectInputStream[listeMachine.size()];
+			// // Initialiser les tableaux
+			// sock = new Socket[listeMachine.size()];
+			// oos = new ObjectOutputStream[listeMachine.size()];
+			// ois = new ObjectInputStream[listeMachine.size()];
 
+
+			HdfsClient hc = new HdfsClient();
 
 			//Main
 			if (args.length < 2) {
@@ -183,15 +208,15 @@ public class HdfsClient {
 			}
 
             switch (args[0]) {
-              case "read": HdfsRead(args[1],args[1]+".resultat"); break; //Fichier local : meme nom et extensions .resultat
-              case "delete": HdfsDelete(args[1]); break;
+              case "read": hc.HdfsRead(args[1],args[1]+".resultat"); break; //Fichier local : meme nom et extensions .resultat
+              case "delete": hc.HdfsDelete(args[1]); break;
               case "write": 
                 Format.Type fmt;
                 if (args.length<3) {usage(); return;}
                 if (args[1].equals("line")) fmt = Format.Type.LINE;
                 else if(args[1].equals("kv")) fmt = Format.Type.KV;
                 else {usage(); return;}
-                HdfsWrite(fmt,args[2],1);
+                hc.HdfsWrite(fmt,args[2],1);
             }	
         } catch (Exception ex) {
             ex.printStackTrace();

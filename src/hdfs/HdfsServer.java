@@ -78,7 +78,6 @@ public class HdfsServer extends Thread {
 					
 					// Reception du texte
 					String strW = (String) ois.readObject();
-					System.out.println(strW);
 					fw.write(strW,0,strW.length()-1);
 					
 					
