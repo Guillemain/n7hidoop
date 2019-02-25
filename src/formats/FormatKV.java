@@ -1,5 +1,6 @@
 package formats;
 
+import java.io.Serializable;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -136,6 +137,10 @@ public class FormatKV implements Format {
 			System.err.println("Fermer le fichier avant de modifier son nom.");
 		}
 
+	}
+
+	public static Format build(String fn) {
+		return new FormatKV(fn);
 	}
 
 

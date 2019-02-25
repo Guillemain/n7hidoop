@@ -25,6 +25,9 @@ public class HdfsClient {
 	private static List<String> listeMachine = new ArrayList<>();
 
 	private static String path = "../data";
+
+	public static final int CHUNK_SIZE = 3;
+
 	
 
 	public HdfsClient() {
@@ -77,52 +80,83 @@ public class HdfsClient {
     	}
     }
 	
-    public void HdfsWrite(Format.Type fmt, String sourceFname, 
+    public void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
      int repFactor) { 
 		System.out.println("Demande d'écriture");
 		
-		String localFSSourceFname = path +  sourceFname;
+		//String localFSSourceFname = path +  sourceFname;
+
+		ArrayList<KV> fragment = new ArrayList<KV>();
+		KV kv;
+		Format fm;
+
+		int fragmentTaille = 0;
+		int numfragment = 0;
     	
     	try {
-    		File fichier = new File(localFSSourceFname);
-            FileReader fr = new FileReader(fichier);
-            BufferedReader buff = new BufferedReader(fr);
+			if (fmt == Format.Type.LINE) { 
+				fm = FormatLine.build(localFSSourceFname);
+			} else {
+				fm = FormatKV.build(localFSSourceFname);
+			}
+			fm.open(Format.OpenMode.R);
+
+    		// File fichier = new File(localFSSourceFname);
+            // FileReader fr = new FileReader(fichier);
+            // BufferedReader buff = new BufferedReader(fr);
             
-            // Compte du nombre de ligne du fichier
-            buff.mark(8192);
-            int nbLigne = 0;
-            while (buff.readLine() != null){
-            	nbLigne ++;
-            }
-            buff.reset();
+            // // Compte du nombre de ligne du fichier
+            // buff.mark(8192);
+            // int nbLigne = 0;
+            // while (buff.readLine() != null){
+            // 	nbLigne ++;
+            // }
+            // buff.reset();
             
-            int quotient = nbLigne/listeMachine.size(); 
-            int reste = nbLigne%listeMachine.size();
+            // int quotient = nbLigne/listeMachine.size(); 
+            // int reste = nbLigne%listeMachine.size();
             
 			for (int i = 0; i < listeMachine.size(); i++) {
 				// Ouverture socket
 				sock[i] = new Socket(listeMachine.get(i), (5000 + i));
 				oos[i] = new ObjectOutputStream(sock[i].getOutputStream());
 				ois[i] = new ObjectInputStream(sock[i].getInputStream());
-				
-				
-				// On envoie les donnes
-				String str = new String();
-				if (i == listeMachine.size()){
-					for (int j = 0; j < quotient; j++) {
-						str += buff.readLine() + "\n";
-					}
-				} else {
-					for (int j = 0; j < quotient + reste; j++) {
-						str += buff.readLine() + "\n";
-					}
-				}
+			}
 
-				//Envoie de la commande et des donnes
-				oos[i].writeObject(Commande.CMD_WRITE);
-				oos[i].writeObject(listeMachine.get(i) + fichier.getName());
-				oos[i].writeObject(fmt);
-				oos[i].writeObject(str);
+			while ((kv = fm.read()) != null) {
+				
+				fragmentTaille ++;
+				fragment.add(kv);
+				
+				if (fragmentTaille == CHUNK_SIZE) {
+					
+					writeFragment(fmt, numfragment%listeMachine.size() , localFSSourceFname, fragment);
+					fragment = new ArrayList<KV>();
+					fragmentTaille = 0;
+					numfragment ++;
+				}
+				
+				// // On envoie les donnes
+				// String str = new String();
+				// if (i == listeMachine.size()){
+				// 	for (int j = 0; j < quotient; j++) {
+				// 		str += buff.readLine() + "\n";
+				// 	}
+				// } else {
+				// 	for (int j = 0; j < quotient + reste; j++) {
+				// 		str += buff.readLine() + "\n";
+				// 	}
+				// }
+
+				// //Envoie de la commande et des donnes
+				// oos[i].writeObject(Commande.CMD_WRITE);
+				// oos[i].writeObject(listeMachine.get(i) + fichier.getName());
+				// oos[i].writeObject(fmt);
+				// oos[i].writeObject(str);
+			}
+
+			if (fragment.size()!=0){
+				writeFragment(fmt, numfragment%listeMachine.size() , localFSSourceFname, fragment);
 			}
             
     		
@@ -189,24 +223,6 @@ public class HdfsClient {
 
         try {
 
-			// TO DO : faire un constructeur décent. 
-			// Gerer les noms. 
-			//  
-        	
-			// // Récupérer le nom des machines serveurs
-			// BufferedReader reader = new BufferedReader(new FileReader("../config/listeMachines.txt"));
-			// String line;
-			// while ((line = reader.readLine()) != null) {
-			// 	listeMachine.add(line);
-			// }
-			// reader.close();
-
-			// // Initialiser les tableaux
-			// sock = new Socket[listeMachine.size()];
-			// oos = new ObjectOutputStream[listeMachine.size()];
-			// ois = new ObjectInputStream[listeMachine.size()];
-
-
 			HdfsClient hc = new HdfsClient();
 
 			//Main
@@ -230,5 +246,32 @@ public class HdfsClient {
             ex.printStackTrace();
         }
     }
+
+
+
+
+private static void writeFragment(Format.Type fmt, int num, String name, ArrayList<KV> fragment) {
+	try {
+		Format fm;
+		if (fmt == Format.Type.LINE) { 
+				fm = FormatLine.build(listeMachine.get(num) + name);
+			} else {
+				fm = FormatKV.build(listeMachine.get(num) + name);
+			}
+
+		oos[num].writeObject(Commande.CMD_WRITE);
+		oos[num].writeObject(listeMachine.get(num) + name);
+		//oos[num].writeObject(fmt);
+		oos[num].writeObject(fm);
+		System.out.println(fragment.get(0));
+		// oos[num].writeObject(fragment);
+		for (KV kv : fragment) {
+			oos[num].writeObject(kv);
+		}
+	} catch (Exception e) {
+		System.out.println("ERREUR WRITEFRAGMENT");
+		e.printStackTrace();
+	}
+}
 
 }

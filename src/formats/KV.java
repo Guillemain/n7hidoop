@@ -1,7 +1,8 @@
 /* Fichier de base */
 package formats;
+import java.io.Serializable;
 
-public class KV {
+public class KV implements Serializable {
 
 	public static final String SEPARATOR = "<->";
 	

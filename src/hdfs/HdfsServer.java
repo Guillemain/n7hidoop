@@ -72,17 +72,26 @@ public class HdfsServer extends Thread {
 					//Lecture du nom du fichier
 					String fnameW = (String) ois.readObject();
 					//Lecture du type du format
-					Type fmtW = (Type) ois.readObject();
+					//Type fmtW = (Type) ois.readObject();
+					Format fmt = (Format) ois.readObject();
+
+					fmt.open(Format.OpenMode.W);
+
+					//On recupere le fragment
+					Object o;
+					while ((o = ois.readObject()) instanceof KV) {
+						fmt.write((KV) o);
+					}
+
+					//FileWriter fw = new FileWriter("../data/"+fnameW);
 					
-					FileWriter fw = new FileWriter("../data/"+fnameW);
-					
-					// Reception du texte
-					String strW = (String) ois.readObject();
-					fw.write(strW,0,strW.length()-1);
+					// // Reception du texte
+					// String strW = (String) ois.readObject();
+					// fw.write(strW,0,strW.length()-1);
 					
 					
 				    // On ferme le fichier d'écriture
-					fw.close();
+					fmt.close();
 					System.out.println("Fin demande écriture");
 					
 					
