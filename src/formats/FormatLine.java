@@ -137,4 +137,9 @@ public class FormatLine implements Format {
 
 	}
 
+	public static Format build(String fn) {
+		return new FormatLine(fn);
+	}
+
+
 }
