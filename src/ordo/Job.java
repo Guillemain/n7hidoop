@@ -48,8 +48,10 @@ public class Job extends Thread implements JobInterface {
     private Format.Type typeFichier;
     //
     private String nomFichier;
+    
+    private String path = "";
 
-    static private String prefixeRetour = "Temp_";
+    private String prefixeRetour = "Temp_";
 
     private String prefixeResultat = "Result_";  
     
@@ -73,6 +75,7 @@ public class Job extends Thread implements JobInterface {
 		  	reader.close();
 		} catch (Exception e) {
 			System.err.println("config/listeMachines.txt absent.");
+			System.exit(-1);
 		}
 		this.portDaemons = portDaemons;
 	}
@@ -183,14 +186,14 @@ public class Job extends Thread implements JobInterface {
         // REDUCE //
         System.out.print(" Création du fichier des résultats =>");
         HdfsClient hc = new HdfsClient();
-        hc.HdfsRead(prefixeRetour+nomFichier, prefixeRetour+nomFichier);
+        hc.HdfsRead(path + prefixeRetour + nomFichier,path + prefixeRetour + nomFichier);
         System.out.println(" Fichier créé. ");
 
         try {
-            System.out.print(" Ouverture du fichier => ");
-            Format fmReduce = new FormatLine(prefixeRetour+nomFichier);
+            System.out.print("path+prefixeRetour+nomFichier");
+            Format fmReduce = new FormatLine(path+prefixeRetour+nomFichier);
             fmReduce.open(Format.OpenMode.R);
-            Format fmResultat = new FormatLine(prefixeResultat+nomFichier);
+            Format fmResultat = new FormatLine(path+prefixeResultat+nomFichier);
             fmResultat.open(Format.OpenMode.W);
             System.out.println(" Reduce en cours ...");
             mr.reduce(fmReduce, fmResultat);

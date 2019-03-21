@@ -24,8 +24,6 @@ public class HdfsClient {
 	// Liste des noms de machines sur lesquels les serveurs ont été déployé
 	private static List<String> listeMachine = new ArrayList<>();
 
-	private static String path = "../data";
-
 	public static final int CHUNK_SIZE = 2;
 
 	public static final int NB_Frag_A_Changer = 12;
@@ -66,22 +64,11 @@ public class HdfsClient {
 			while (numfragment < NB_Frag_A_Changer) {
 				int numServeur = numfragment%listeMachine.size();
 
-				Socket sock = new Socket(listeMachine.get(numServeur), (6000 + numServeur));
+				Socket sock = new Socket(listeMachine.get(numServeur), (5000 + numServeur));
         		ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
-
-				// sock[numServeur] = new Socket(listeMachine.get(numServeur), (6000 + numServeur));
-        		// oos[numServeur] = new ObjectOutputStream(sock[numServeur].getOutputStream());
-				
-				// oos[numServeur].writeObject(Commande.CMD_DELETE);
-			 	// oos[numServeur].writeObject(listeMachine.get(numServeur) + hdfsFname + "_" + numfragment );
-
-				
-
-				// oos[numServeur].close();
-        		// sock[numServeur].close();
-
+        		
 				oos.writeObject(Commande.CMD_DELETE);
-				oos.writeObject(listeMachine.get(numServeur)+ hdfsFname + "_" + numfragment);
+				oos.writeObject(NameNodeInterface.path +listeMachine.get(numServeur)+ hdfsFname + "_" + numfragment);
 
 				oos.close();
 				sock.close();
@@ -96,8 +83,6 @@ public class HdfsClient {
 	
     public void HdfsWrite(Format.Type fmt, String localFSSourceFname, int repFactor) { 
 		System.out.println("Demande d'écriture");
-		
-		//String localFSSourceFname = path +  sourceFname;
 
 		ArrayList<KV> fragment = new ArrayList<KV>();
 		KV kv;
@@ -108,20 +93,20 @@ public class HdfsClient {
     	
     	try {
 			if (fmt == Format.Type.LINE) { 
-				fm = FormatLine.build(localFSSourceFname);
+				fm = FormatLine.build(NameNodeInterface.path + localFSSourceFname);
 			} else {
-				fm = FormatKV.build(localFSSourceFname);
+				fm = FormatKV.build(NameNodeInterface.path + localFSSourceFname);
 			}
 			fm.open(Format.OpenMode.R);
 
 			while ((kv = fm.read()) != null) {
 				
-				fragmentTaille ++;
+				fragmentTaille ++;//
 				fragment.add(kv);
 				
 				if (fragmentTaille == CHUNK_SIZE) {
 					
-					writeFragment(fmt, numfragment%listeMachine.size() , localFSSourceFname, fragment, numfragment);
+					writeFragment(fmt, numfragment%listeMachine.size() ,localFSSourceFname, fragment, numfragment);
 					fragment = new ArrayList<KV>();
 					fragmentTaille = 0;
 					numfragment ++;
@@ -129,7 +114,7 @@ public class HdfsClient {
 			}
 
 			if (fragment.size()!=0){
-				writeFragment(fmt, numfragment%listeMachine.size() , localFSSourceFname, fragment, numfragment);
+				writeFragment(fmt, numfragment%listeMachine.size() ,localFSSourceFname, fragment, numfragment);
 			}
             
 			fm.close();
@@ -147,7 +132,7 @@ public class HdfsClient {
 		//String hdfsFname = path + nom;
 
         System.out.println("Demande de lecture");
-        File fichier = new File(localFSDestFname);
+        File fichier = new File(NameNodeInterface.path + localFSDestFname);
         try {
 
 			int numfragment = 0;
@@ -155,13 +140,13 @@ public class HdfsClient {
 			while (numfragment < NB_Frag_A_Changer) {
 				int numServeur = numfragment%listeMachine.size();
 
-				Socket sock =  new Socket(listeMachine.get(numServeur), (6000 + numServeur));
+				Socket sock =  new Socket(listeMachine.get(numServeur), (5000 + numServeur));
         		ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
 				ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
 
 
 				oos.writeObject(Commande.CMD_READ);
-			 	oos.writeObject(listeMachine.get(numServeur) + hdfsFname + "_" + numfragment );
+			 	oos.writeObject(NameNodeInterface.path + listeMachine.get(numServeur) + hdfsFname + "_" + numfragment );
 
 				
 				// Lecture du fichier reçu
@@ -222,18 +207,18 @@ private void writeFragment(Format.Type fmt, int num, String name, ArrayList<KV> 
 		//sock[num] = new Socket(listeMachine.get(num), (6000 + num));
         //oos[num] = new ObjectOutputStream(sock[num].getOutputStream());
 
-		Socket sock = new Socket(listeMachine.get(num), (6000 + num));
+		Socket sock = new Socket(listeMachine.get(num), (5000 + num));
         ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
 		Format fm;
 		if (fmt == Format.Type.LINE) { 
-				fm = FormatLine.build(listeMachine.get(num) + name + "_" + numF);
+				fm = FormatLine.build(NameNodeInterface.path + listeMachine.get(num) + name + "_" + numF);
 
 			} else {
-				fm = FormatKV.build(listeMachine.get(num) + name + "_" + numF);
+				fm = FormatKV.build(NameNodeInterface.path + listeMachine.get(num) + name + "_" + numF);
 			}
 
 		oos.writeObject(Commande.CMD_WRITE);
-		oos.writeObject(listeMachine.get(num) + name);
+		oos.writeObject(NameNodeInterface.path + listeMachine.get(num) + name);
 		//oos[num].writeObject(fmt);
 		oos.writeObject(fm);
 		//System.out.println(fragment.get(0));

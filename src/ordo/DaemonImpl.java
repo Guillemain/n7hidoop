@@ -21,7 +21,7 @@ import map.Mapper;
 /* A exécuter sur les machines serveur */
 public class DaemonImpl extends UnicastRemoteObject implements Daemon {
     
-    private static String path = "../data";
+    private static String path = "../data/";
 	String nomDuDaemon="DaemonSansNom";
 	public String getNomDuDaemon() {
 		return nomDuDaemon;
@@ -56,21 +56,26 @@ public class DaemonImpl extends UnicastRemoteObject implements Daemon {
     }
 
     public void runMap(Mapper m, Format reader, Format writer, Callback cb) {
-        // Jouer avec les formats...
-        
     	try {
             //On ajoute le path
             reader.setFname(path + reader.getFname());
             writer.setFname(path + writer.getFname());
 			reader.open(Format.OpenMode.R);
 			writer.open(Format.OpenMode.W);
+	        System.out.print("<=" + nomDuDaemon + "Requête reçue :"); // tout est dit ?
+	        m.map(reader, writer);
+	        System.out.print(" - Traitement fini - ");
 		} catch (Exception e) {
 			System.err.println("Erreur dans l'ouverture du fichier !");
+		} finally {
+			try {
+				reader.close();
+				writer.close();
+			} catch (Exception e) {
+				System.err.println("Erreur dans la fermeture du fichier !");
+			}
 		}
-    	//
-        System.out.print("<=" + nomDuDaemon + "Requête reçue :"); // tout est dit ?
-        m.map(reader, writer);
-        System.out.print(" - Traitement fini - ");
+    	
         try {
             System.out.print(" => On annonce au mainNode que nous avons terminé : ");
             GestionnaireCB gcb = (GestionnaireCB) Naming.lookup(cb.getAdresseRetour()); //On recupère le gcb 
@@ -79,14 +84,7 @@ public class DaemonImpl extends UnicastRemoteObject implements Daemon {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        try {
-			reader.close();
-			writer.close();
-		} catch (Exception e) {
-			System.err.println("Erreur dans la fermeture du fichier !");
-		}
     }
-
 
 	@Override
 	public void ping(Callback cb) throws RemoteException {

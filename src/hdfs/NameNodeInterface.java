@@ -12,6 +12,7 @@ import java.util.HashMap;
  */
 
 public interface NameNodeInterface {
+	public static String path = "../data/";
 	
 	/**
 	 * @param nomDuFichier

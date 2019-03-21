@@ -85,10 +85,8 @@ public class FormatKV implements Format {
             	oLect = true;
                 //On ouvre le fichie en lecture
                 fichier.setReadable(true);
-                fichstatic
-                buffstatic
 
-            } else {static
+            } else {
             	System.out.println("Ouverture du fichier "+ nameF + " en mode ecriture.");
             	oEcriture = true;
             	fichier.setWritable(true);
