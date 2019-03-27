@@ -70,6 +70,7 @@ public class HdfsServer extends Thread {
                     
                     break;
                 case CMD_WRITE:
+                	/*Creer fichier ici.*/
                     System.out.println("Demande d'écriture reçue par le serveur");
                     //Lecture du nom du fichier
                     String fnameW = (String) ois.readObject();

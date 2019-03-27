@@ -211,7 +211,7 @@ private void writeFragment(Format.Type fmt, int num, String name, ArrayList<KV> 
         ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
 		Format fm;
 		if (fmt == Format.Type.LINE) { 
-				fm = FormatLine.build(NameNodeInterface.path + listeMachine.get(num) + name + "_" + numF);
+				fm = FormatLine.build(NameNodeInterface.path + listeMachine.get(num) + name + "_" + numF); // ABERATION ICI.
 
 			} else {
 				fm = FormatKV.build(NameNodeInterface.path + listeMachine.get(num) + name + "_" + numF);
@@ -219,14 +219,13 @@ private void writeFragment(Format.Type fmt, int num, String name, ArrayList<KV> 
 
 		oos.writeObject(Commande.CMD_WRITE);
 		oos.writeObject(NameNodeInterface.path + listeMachine.get(num) + name);
-		//oos[num].writeObject(fmt);
 		oos.writeObject(fm);
-		//System.out.println(fragment.get(0));
-		// oos[num].writeObject(fragment);
+		
 		for (KV kv : fragment) {
 			//System.out.println(kv);
 			oos.writeObject(kv);
 		}
+		
 		oos.writeObject("fini");
         oos.close();
         sock.close();

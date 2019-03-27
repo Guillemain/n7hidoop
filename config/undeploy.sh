@@ -12,7 +12,7 @@ done
 cmpt=5000
 for i in $*;
 do
-ssh $i "ps -l ; killall java ; ps -l" 
+ssh $i " killall java ;" 
 cmpt=$((($cmpt)+1))
 done
 echo "fini"
