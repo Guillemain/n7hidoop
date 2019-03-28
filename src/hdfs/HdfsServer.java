@@ -73,28 +73,18 @@ public class HdfsServer extends Thread {
                 	/*Creer fichier ici.*/
                     System.out.println("Demande d'écriture reçue par le serveur");
                     //Lecture du nom du fichier
-                    String fnameW = (String) ois.readObject();
-                    //Lecture du type du format
-                    //Type fmtW = (Type) ois.readObject();
+                    String fnameW = (String) ois.readObject(); 
                     Format fmt = (Format) ois.readObject();
-
                     fmt.open(Format.OpenMode.W);
                     System.out.println("jusque la ok");
-                    //On recupere le fragment
                     Object o;
                     while ((o = ois.readObject()) instanceof KV) {
-//                      System.out.println(o);
                         System.out.println(sock.getLocalPort() +"-->"+o);
 
                         fmt.write((KV) o);
                     }
-                    
-                    // On ferme le fichier d'écriture
                     fmt.close();
-//                  System.out.println("Fin demande écriture/serveur");
                     System.out.println("Fin demande écriture/serveur "+sock.getLocalPort());
-                    
-                    
                     break;
                 case CMD_DELETE:
                     System.out.println("Demande de suppresion reçue par le serveur");

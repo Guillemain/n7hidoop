@@ -69,6 +69,7 @@ public class HdfsClient {
         		
 				oos.writeObject(Commande.CMD_DELETE);
 				oos.writeObject(NameNodeInterface.path +listeMachine.get(numServeur)+ hdfsFname + "_" + numfragment);
+				oos.flush(); // la bonne habitude
 
 				oos.close();
 				sock.close();
@@ -218,15 +219,20 @@ private void writeFragment(Format.Type fmt, int num, String name, ArrayList<KV> 
 			}
 
 		oos.writeObject(Commande.CMD_WRITE);
+		oos.flush();
 		oos.writeObject(NameNodeInterface.path + listeMachine.get(num) + name);
+		oos.flush();
 		oos.writeObject(fm);
+		oos.flush();
 		
 		for (KV kv : fragment) {
 			//System.out.println(kv);
 			oos.writeObject(kv);
+			oos.flush();
 		}
 		
 		oos.writeObject("fini");
+		oos.flush();
         oos.close();
         sock.close();
 	} catch (Exception e) {
