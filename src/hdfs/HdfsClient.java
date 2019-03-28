@@ -64,7 +64,7 @@ public class HdfsClient {
 			while (numfragment < NB_Frag_A_Changer) {
 				int numServeur = numfragment%listeMachine.size();
 
-				Socket sock = new Socket(listeMachine.get(numServeur), (5000 + numServeur));
+				Socket sock = new Socket(listeMachine.get(numServeur), (6000 + numServeur));
         		ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
         		
 				oos.writeObject(Commande.CMD_DELETE);

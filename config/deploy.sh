@@ -15,7 +15,7 @@ do echo -n "|\t"
 echo $i;
 done
 #Lancement
-cmpt=5000
+cmpt=6000
 for i in $*;
 do
 ssh $i "cd $chemin && java hdfs/HdfsServer $cmpt "& 
