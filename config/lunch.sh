@@ -1,1 +1,1 @@
-sh ../config/daemonMapDeploy.sh baratheongreygoydorne
+sh ../config/daemonMapDeploy.sh baratheon greygoy dorne 

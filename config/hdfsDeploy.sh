@@ -1,1 +1,1 @@
-sh ../config/deploy.sh baratheongreygoydorne
+sh ../config/deploy.sh baratheon greygoy dorne 
