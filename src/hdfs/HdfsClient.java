@@ -24,7 +24,7 @@ public class HdfsClient {
 	// Liste des noms de machines sur lesquels les serveurs ont été déployé
 	private static List<String> listeMachine = new ArrayList<>();
 
-	public static final int CHUNK_SIZE = 2;
+	public static final int CHUNK_SIZE = 100;
 
 	public static final int NB_Frag_A_Changer = 12;
 
@@ -141,7 +141,7 @@ public class HdfsClient {
 			while (numfragment < NB_Frag_A_Changer) {
 				int numServeur = numfragment%listeMachine.size();
 
-				Socket sock =  new Socket(listeMachine.get(numServeur), (5000 + numServeur));
+				Socket sock =  new Socket(listeMachine.get(numServeur), (6000 + numServeur));
         		ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
 				ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
 
@@ -202,13 +202,12 @@ public class HdfsClient {
 
 
 
-
 private void writeFragment(Format.Type fmt, int num, String name, ArrayList<KV> fragment, int numF) {
 	try {
 		//sock[num] = new Socket(listeMachine.get(num), (6000 + num));
         //oos[num] = new ObjectOutputStream(sock[num].getOutputStream());
 
-		Socket sock = new Socket(listeMachine.get(num), (5000 + num));
+		Socket sock = new Socket(listeMachine.get(num), (6000 + num));
         ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
 		Format fm;
 		if (fmt == Format.Type.LINE) { 

@@ -1,1 +1,1 @@
-sh ../config/deploy.sh baratheon greygoy dorne 
+sh ../config/deploy.sh descartes yoda azote

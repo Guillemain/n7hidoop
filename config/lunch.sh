@@ -1,1 +1,1 @@
-sh ../config/daemonMapDeploy.sh baratheon greygoy dorne 
+sh ../config/daemonMapDeploy.sh descartes yoda azote
