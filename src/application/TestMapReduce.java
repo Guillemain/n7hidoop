@@ -14,7 +14,10 @@ import java.util.HashMap;
 
 
 public class TestMapReduce {
-
+	/**
+	 * Simple tests de bases. Le fichier doit être rendu intégralement
+	 * @param args port du daemon.
+	 */
 	public static void main(String[] args) {
 		HashMap<String, String> listenodes = new HashMap<>();
 		for (int i = 0; i < args.length-1; i = i+2){
@@ -29,16 +32,20 @@ public class TestMapReduce {
 			
 			@Override
 			public void reduce(FormatReader reader, FormatWriter writer) {
-                KV premiereLigne =  reader.read();
-                System.out.println(premiereLigne.v);
-                writer.write(premiereLigne);
+				reader.read();
+				reader.read();
+				KV kv;
+				while ((kv = reader.read()) != null) {
+					writer.write(kv);
+				}
 			}
 			
 			@Override
 			public void map(FormatReader reader, FormatWriter writer) {
 				KV kv;
 				while ((kv = reader.read()) != null) {
-					System.out.println(reader.read().v);
+					//System.out.println(kv.v);
+					writer.write(kv);
 				}
 			}
 		};

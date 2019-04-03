@@ -66,7 +66,4 @@ public interface NameNodeInterface {
 	 */
 	public boolean estCeSuffisantFragments(ArrayList<String> listeDesFragments);
 	
-	
-	
-
 }

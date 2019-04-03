@@ -1,1 +1,1 @@
-sh ../config/daemonMapDeploy.sh descartes yoda azote
+sh ../config/daemonMapDeploy.sh descartes r2d2 azote hugo solo sand

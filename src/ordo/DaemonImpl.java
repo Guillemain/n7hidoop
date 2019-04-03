@@ -19,10 +19,23 @@ import map.Mapper;
  * 
  */
 /* A exécuter sur les machines serveur */
-public class DaemonImpl extends UnicastRemoteObject implements Daemon {
+public class DaemonImpl extends UnicastRemoteObject implements Daemon, Runnable {
     
     private static String path = "../data/";
-	String nomDuDaemon="DaemonSansNom";
+	Mapper mapper;
+	Format reader;
+	Format writer;
+	Callback cb;
+    
+    String nomDuDaemon="DaemonSansNom";
+    
+    public DaemonImpl(Mapper m, Format reader, Format writer, Callback cb) throws RemoteException {
+    	this.mapper = m;
+    	this.reader = reader;
+    	this.writer = writer;
+    	this.cb = cb;
+    }
+    
 	public String getNomDuDaemon() {
 		return nomDuDaemon;
 	}
@@ -53,22 +66,62 @@ public class DaemonImpl extends UnicastRemoteObject implements Daemon {
     protected DaemonImpl() throws RemoteException {
         super();
         // TODO Auto-generated constructor stub
-    }
+    } 
 
     public void runMap(Mapper m, Format reader, Format writer, Callback cb) {
     	try {
-            //On ajoute le path
-            reader.setFname(path + reader.getFname());
-            writer.setFname(path + writer.getFname());
-			reader.open(Format.OpenMode.R);
-			writer.open(Format.OpenMode.W);
-	        System.out.print("<=" + nomDuDaemon + "Requête reçue :"); // tout est dit ?
-	        m.map(reader, writer);
-	        System.out.print(" - Traitement fini - ");
+			Thread t =new Thread(new DaemonImpl(m,reader,writer,cb));
+			t.start();
+		} catch (Exception e) {
+			System.out.println("Erreur dans le thread");
+		}
+    }
+
+	@Override
+	public void ping(Callback cb) throws RemoteException {
+		try {
+            //System.out.print(" => " + nomDuDaemon + " On annonce au mainNode que nous avons été pingué ! : ");
+            GestionnaireCB gcb = (GestionnaireCB) Naming.lookup(cb.getAdresseRetour());
+            gcb.notifierFinCalcul(cb.getID());
+            //System.out.println(" => annonce passée.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+	}
+
+	@Override
+	public void run() {
+		try {
+			try {
+				reader.setFname(reader.getFname());
+				reader.open(Format.OpenMode.R);
+			} catch (Exception e) {
+				System.out.println("Erreur dans " +  reader.getFname());
+			}
+            
+			try {
+				writer.setFname(writer.getFname());
+				writer.open(Format.OpenMode.W);
+			} catch (Exception e) {
+				System.out.println("Erreur dans " +  writer.getFname());
+			}
+            
+	        //System.out.print("<=" + nomDuDaemon + "Requête reçue :"); // tout est dit ?
+	        mapper.map(reader, writer);
+	        //System.out.print(" - Traitement fini - ");
 		} catch (Exception e) {
 			System.err.println("Erreur dans l'ouverture du fichier !");
+			e.printStackTrace();
 		} finally {
 			try {
+				 try {
+			            //System.out.print(" => On annonce au mainNode que nous avons terminé : ");
+			            GestionnaireCB gcb = (GestionnaireCB) Naming.lookup(cb.getAdresseRetour()); //On recupère le gcb 
+			            gcb.notifierFinCalcul(cb.getID()); // On notifie le gcb qui va à son tour notifier Job.
+			            //System.out.println(" => annonce passée.");
+			        } catch (Exception e) {
+			            e.printStackTrace();
+			        }
 				reader.close();
 				writer.close();
 			} catch (Exception e) {
@@ -76,26 +129,8 @@ public class DaemonImpl extends UnicastRemoteObject implements Daemon {
 			}
 		}
     	
-        try {
-            System.out.print(" => On annonce au mainNode que nous avons terminé : ");
-            GestionnaireCB gcb = (GestionnaireCB) Naming.lookup(cb.getAdresseRetour()); //On recupère le gcb 
-            gcb.notifierFinCalcul(cb.getID()); // On notifie le gcb qui va à son tour notifier Job.
-            System.out.println(" => annonce passée.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-	@Override
-	public void ping(Callback cb) throws RemoteException {
-		try {
-            System.out.print(" => " + nomDuDaemon + " On annonce au mainNode que nous avons été pingué ! : ");
-            GestionnaireCB gcb = (GestionnaireCB) Naming.lookup(cb.getAdresseRetour());
-            gcb.notifierFinCalcul(cb.getID());
-            System.out.println(" => annonce passée.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+       
+		
 	}
 
 }

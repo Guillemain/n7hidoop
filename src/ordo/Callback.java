@@ -10,5 +10,5 @@ import formats.Format;
 public interface Callback extends Serializable {
 	public String getAdresseRetour();
 
-	public String getID();
+	public int getID();
 }

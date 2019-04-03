@@ -16,6 +16,6 @@ import org.omg.SendingContext.RunTime;
 
 public interface GestionnaireCB extends Remote {
 
-    public void notifierFinCalcul(String id) throws RemoteException;
+    public void notifierFinCalcul(int id) throws RemoteException;
 
 }

@@ -31,7 +31,7 @@ public class GestionnaireCBImpl extends UnicastRemoteObject implements Gestionna
         monJobManager = job;
     }
 
-    public void notifierFinCalcul(String id) throws RemoteException {
+    public void notifierFinCalcul(int id) throws RemoteException {
     	System.out.println(id + " me signale la fin de son calcul.");
         monJobManager.notifierFinCalcul(id);
     }

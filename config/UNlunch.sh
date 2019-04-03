@@ -1,1 +1,1 @@
-sh ../config/undeploy.sh descartes yoda azote
+sh ../config/undeploy.sh descartes r2d2 azote hugo solo sand

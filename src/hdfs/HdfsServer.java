@@ -80,7 +80,6 @@ public class HdfsServer extends Thread {
                     Object o;
                     while ((o = ois.readObject()) instanceof KV) {
                         System.out.println(sock.getLocalPort() +"-->"+o);
-
                         fmt.write((KV) o);
                     }
                     fmt.close();

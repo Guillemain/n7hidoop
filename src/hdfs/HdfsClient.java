@@ -24,9 +24,9 @@ public class HdfsClient {
 	// Liste des noms de machines sur lesquels les serveurs ont été déployé
 	private static List<String> listeMachine = new ArrayList<>();
 
-	public static final int CHUNK_SIZE = 100;
+	public static final int CHUNK_SIZE = 5;
 
-	public static final int NB_Frag_A_Changer = 12;
+	public static final int NB_Frag_A_Changer = 7;
 
 	
 
@@ -125,6 +125,7 @@ public class HdfsClient {
     		e.printStackTrace();
     	}
     	
+    	
     }
 
     public void HdfsRead(String hdfsFname, String localFSDestFname) {
@@ -136,7 +137,7 @@ public class HdfsClient {
         File fichier = new File(NameNodeInterface.path + localFSDestFname);
         try {
 
-			int numfragment = 0;
+			int numfragment = 1; //Fameux bug sur le numéro 0
 			FileWriter fw = new FileWriter(fichier);
 			while (numfragment < NB_Frag_A_Changer) {
 				int numServeur = numfragment%listeMachine.size();
@@ -211,8 +212,7 @@ private void writeFragment(Format.Type fmt, int num, String name, ArrayList<KV> 
         ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
 		Format fm;
 		if (fmt == Format.Type.LINE) { 
-				fm = FormatLine.build(NameNodeInterface.path + listeMachine.get(num) + name + "_" + numF); // ABERATION ICI.
-
+				fm = FormatLine.build(NameNodeInterface.path + listeMachine.get(num) + name + "_" + numF);
 			} else {
 				fm = FormatKV.build(NameNodeInterface.path + listeMachine.get(num) + name + "_" + numF);
 			}
