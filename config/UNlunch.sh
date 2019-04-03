@@ -1,1 +1,1 @@
-sh ../config/undeploy.sh descartes r2d2 azote hugo solo sand
+sh ../config/undeploy.sh eowyn arryn sand

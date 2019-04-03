@@ -32,7 +32,7 @@ public class HdfsServer extends Thread {
         while (true) {
             //Creation d'un thread
             Thread t = new HdfsServer(ss.accept());
-            System.out.println("============>>>>Thread créé pour le serveur : " + args[0]);
+            //System.out.println("============>>>>Thread créé pour le serveur : " + args[0]);
             t.start();
         }
     }
@@ -51,7 +51,7 @@ public class HdfsServer extends Thread {
                 
                 switch(cmd){
                 case CMD_READ:
-                    System.out.println("Demande de lecture reçue par le serveur");
+                    //System.out.println("Demande de lecture reçue par le serveur");
                     //Lecture du nom du fichier
                     String fnameR = (String) ois.readObject();
                     //FileReader fr = new FileReader("../data/"+fnameR);
@@ -65,33 +65,33 @@ public class HdfsServer extends Thread {
                     }
                     buff.close();
                     oos.writeObject(str);
-                    System.out.println("Message envoyé");
+                    //System.out.println("Message envoyé");
                     
                     
                     break;
                 case CMD_WRITE:
                 	/*Creer fichier ici.*/
-                    System.out.println("Demande d'écriture reçue par le serveur");
+                    //System.out.println("Demande d'écriture reçue par le serveur");
                     //Lecture du nom du fichier
                     String fnameW = (String) ois.readObject(); 
                     Format fmt = (Format) ois.readObject();
                     fmt.open(Format.OpenMode.W);
-                    System.out.println("jusque la ok");
+                    //System.out.println("jusque la ok");
                     Object o;
                     while ((o = ois.readObject()) instanceof KV) {
-                        System.out.println(sock.getLocalPort() +"-->"+o);
+                        //System.out.println(sock.getLocalPort() +"-->"+o);
                         fmt.write((KV) o);
                     }
                     fmt.close();
-                    System.out.println("Fin demande écriture/serveur "+sock.getLocalPort());
+                    //System.out.println("Fin demande écriture/serveur "+sock.getLocalPort());
                     break;
                 case CMD_DELETE:
-                    System.out.println("Demande de suppresion reçue par le serveur");
+                    //System.out.println("Demande de suppresion reçue par le serveur");
                     //Lecture du nom du fichier
                     String fnameD = (String) ois.readObject();
                     File f = new File(fnameD);
                     f.delete();
-                    System.out.println("Fichier " + fnameD + " supprimé");
+                    //System.out.println("Fichier " + fnameD + " supprimé");
                     break;
 
                 default:

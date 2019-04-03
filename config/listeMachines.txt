@@ -1,6 +1,3 @@
-descartes
-r2d2
-azote
-hugo
-solo
+eowyn
+arryn
 sand

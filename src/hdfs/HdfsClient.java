@@ -46,8 +46,6 @@ public class HdfsClient {
 		return nb;
 	}
 
-	
-
 	public HdfsClient() {
 		try {
 		// Récupérer le nom des machines serveurs

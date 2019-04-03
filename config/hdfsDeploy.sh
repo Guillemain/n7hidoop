@@ -1,1 +1,1 @@
-sh ../config/deploy.sh descartes r2d2 azote hugo solo sand
+sh ../config/deploy.sh eowyn arryn sand
