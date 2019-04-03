@@ -236,13 +236,13 @@ public class Job extends Thread implements JobInterface {
             System.err.println("FIN, fichier de résultat enregistré au nom de : "  + nomFichier + prefixeResultat );
             fmReduce.close();
             fmResultat.close();
-            hc.HdfsDelete( nomFichier + prefixeRetour);
+            //hc.HdfsDelete( nomFichier + prefixeRetour);
             
         } catch (Exception e) {
            e.printStackTrace();
         }        
         
-        System.exit(0);
+        //System.exit(0);
     }
 
     /**

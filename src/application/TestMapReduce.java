@@ -25,6 +25,7 @@ public class TestMapReduce {
 			listenodes.put(args[i], args[i+1]);
 		}
 		System.out.println(listenodes);*/
+	
 		Job job = new Job();
 		job.setPortDaemons(5510);//Integer.valueOf(args[0]));
 		job.setInputFormat(Format.Type.LINE);
@@ -55,7 +56,12 @@ public class TestMapReduce {
 				writer.write(resultat);
 			}
 		};
+		long debut = System.currentTimeMillis();
+		System.out.println("=============POULOULOU=============");
 		job.startJob(map);
-		
+		System.out.println("=============POULOULOU=============");
+		System.out.println( System.currentTimeMillis()-debut);
+		System.exit(0);
 	}
+	
 }
