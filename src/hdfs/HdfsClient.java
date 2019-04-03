@@ -10,6 +10,7 @@ import formats.Commande;
 
 import java.io.*;
 import java.net.*;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,24 @@ public class HdfsClient {
 
 	public static final int CHUNK_SIZE = 5;
 
-	public static final int NB_Frag_A_Changer = 12;
+	private int NB_Frag_A_Changer = 12;
+	
+	/** Methode permettant de connaitre le nombre de fragment d'un fichier */
+	/* Paliant l'abscence d'implementatio NameNode */
+	public int nombreDeFragment(String name){
+		Format fm = new FormatKV("../config/tableFragment.kv");
+		fm.open(Format.OpenMode.R);
+		int nb = 0;
+		KV kv;
+		System.out.println(fm);
+		while ((kv = fm.read()) != null) {
+			if (name.equals(kv.k)){
+				nb = Integer.parseInt(kv.v);
+			}
+		}
+		fm.close();
+		return nb;
+	}
 
 	
 
@@ -58,6 +76,7 @@ public class HdfsClient {
     public void HdfsDelete(String hdfsFname) {
     	System.out.println("Demande de suppression");
     	//String hdfsFname = path + nom;
+    	NB_Frag_A_Changer = nombreDeFragment(hdfsFname);
     	try {
     		
 			int numfragment = 0;
@@ -119,6 +138,13 @@ public class HdfsClient {
 			}
             
 			fm.close();
+			
+			Format configFragment = new FormatKV("../config/tableFragment.kv");
+            configFragment.open(Format.OpenMode.W);
+            configFragment.write(new KV(localFSSourceFname,Integer.toString(numfragment)));
+            configFragment.close();
+            
+            
     		
     	} catch (Exception e) {
     		System.out.println("Erreur HdfdWrite (Client)");
@@ -132,7 +158,7 @@ public class HdfsClient {
 
 		//String localFSDestFname = path +  destFname;
 		//String hdfsFname = path + nom;
-
+    	NB_Frag_A_Changer = nombreDeFragment(hdfsFname);
         System.out.println("Demande de lecture");
         File fichier = new File(NameNodeInterface.path + localFSDestFname);
         try {
@@ -163,6 +189,8 @@ public class HdfsClient {
 			}
 			fw.close();
             System.out.println("HdfsRead données dans le fichier local ");
+            
+            
         } catch (Exception e) {
             System.out.println("HdfsRead (Client)");
             e.printStackTrace();
@@ -194,6 +222,10 @@ public class HdfsClient {
                 else if(args[1].equals("kv")) fmt = Format.Type.KV;
                 else {usage(); return;}
                 hc.HdfsWrite(fmt,args[2],1);
+                break;
+              case "nbFrag":
+            	  System.out.println(hc.nombreDeFragment(args[1]));
+            	  break;
 
             }	
         } catch (Exception ex) {
