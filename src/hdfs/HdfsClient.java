@@ -26,7 +26,7 @@ public class HdfsClient {
 
 	public static final int CHUNK_SIZE = 5;
 
-	public static final int NB_Frag_A_Changer = 7;
+	public static final int NB_Frag_A_Changer = 12;
 
 	
 

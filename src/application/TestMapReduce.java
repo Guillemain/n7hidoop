@@ -19,34 +19,40 @@ public class TestMapReduce {
 	 * @param args port du daemon.
 	 */
 	public static void main(String[] args) {
+		/*
 		HashMap<String, String> listenodes = new HashMap<>();
 		for (int i = 0; i < args.length-1; i = i+2){
 			listenodes.put(args[i], args[i+1]);
 		}
-		System.out.println(listenodes);
+		System.out.println(listenodes);*/
 		Job job = new Job();
-		job.setPortDaemons(Integer.valueOf(args[0]));
+		job.setPortDaemons(5510);//Integer.valueOf(args[0]));
 		job.setInputFormat(Format.Type.LINE);
 		job.setInputFname("spleen.txt");
 		MapReduce map = new MapReduce() {
 			
 			@Override
 			public void reduce(FormatReader reader, FormatWriter writer) {
-				reader.read();
-				reader.read();
 				KV kv;
+				int i = 0;
 				while ((kv = reader.read()) != null) {
-					writer.write(kv);
+					//writer.write(kv);
+					i += Integer.parseInt(kv.v);
 				}
+				KV resultat = new KV("R", Integer.toString(i));
+				writer.write(resultat);
 			}
 			
 			@Override
 			public void map(FormatReader reader, FormatWriter writer) {
+				int i = 0;
 				KV kv;
 				while ((kv = reader.read()) != null) {
 					//System.out.println(kv.v);
-					writer.write(kv);
+					i++;
 				}
+				KV resultat = new KV("R", Integer.toString(i));
+				writer.write(resultat);
 			}
 		};
 		job.startJob(map);
